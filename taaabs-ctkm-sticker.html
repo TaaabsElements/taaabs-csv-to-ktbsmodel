@@ -1,0 +1,255 @@
+<link rel="import" href="../taaabs-themes/taaabs-dark-theme.html">
+<dom-module id="taaabs-ctkm-sticker">
+
+
+	<template>
+
+		<style include="taaabs-dark-theme"></style>
+    <style>
+
+    :host #container {
+      margin: 10px;
+      display: table;
+      height: 100px;
+    }
+
+    /* LEFT PANEL */
+    :host #leftPanel {
+      display: table-cell;
+      width: 250px;
+    }
+
+    :host #leftPanel > div {
+      padding: 15px;
+    }
+
+    :host select {
+      width: 100%;
+    }
+
+
+    /* RIGHT PANEL */
+
+    :host #rightPanel > div {
+      display: block;
+      position: absolute;
+      font-size: 12px;
+      letter-spacing: normal;
+      line-height: normal;
+      text-align: right;
+      margin: 0;
+      padding: 0;
+      height: 26px;
+      width: 100px;
+      margin-left: -34px;
+      margin-top: 45px;
+      -webkit-transform: rotate(-90deg);
+      transform: rotate(-90deg);
+    }
+
+    :host #rightPanel > div > iron-icon {
+      -webkit-transform: rotate(90deg);
+      transform: rotate(90deg);
+      width: 20px;
+      margin-left: 10px;
+      opacity: 0.67;
+      -webkit-transition: opacity 0.25s ease-in-out;
+      -moz-transition: opacity 0.25s ease-in-out;
+      -o-transition: opacity 0.25s ease-in-out;
+      -ms-transition: opacity 0.25s ease-in-out;
+    }
+
+    :host #rightPanel > div > iron-icon:hover {
+      cursor: pointer;
+      opacity: 1;
+    }
+
+    :host #rightPanel {
+      display: table-cell;
+      background-color: #87D37C;
+      width: 30px;
+      -webkit-transition: background-color 0.25s ease-in-out;
+      -moz-transition: background-color 0.25s ease-in-out;
+      -o-transition: background-color 0.25s ease-in-out;
+      -ms-transition: background-color 0.25s ease-in-out;
+    }
+
+    </style>
+
+  	<div id="container">
+      <div id="leftPanel">
+        <div>
+          <input class="inputWithIcon" value="{{attribute.name::input}}">
+            <iron-icon class="inputWithIconIcon" icon="icons:create"></iron-icon>
+          </input>
+        </div>
+        <div>
+          <select id="datatypeSelect" value="{{attribute.datatype::change}}">
+            <option selected value="xsd:string">String</option>
+            <option value="xsd:decimal">Number</option>
+						<option value="json">JSON</option>
+          </select>
+        </div>
+      </div>
+  		<div id="rightPanel">
+        <div>
+    			<span>{{_enabledMessage}}</span>
+    			<iron-icon icon="icons:power-settings-new" on-click="_switchEnabledStatus"></iron-icon>
+        </div>
+		  </div>
+  	</div>
+
+	</template>
+
+	<script>
+	/* global Polymer */
+
+	/**
+	*
+	*/
+	Polymer({
+	  is: 'taaabs-ctkm-sticker',
+
+	  properties: {
+
+      enabled: {
+        type: Boolean,
+        notify: true,
+        value: true
+      },
+
+      attribute: {
+        type: Object,
+        notify: true,
+        value: function(){
+          return {};
+        },
+        observer: '_attributeChanged'
+      },
+
+      _enabledMessage:{
+        type: String,
+        notify: true,
+        value: "Enabled"
+      },
+
+
+      /**
+      * Localization object.
+      *
+      * @attribute _i18n
+      * @type Object
+      */
+      _i18n: {
+          type: Object,
+          value: {
+            'enabled': {
+              'default': 'Enabled',
+              'en': 'Enabled',
+              'fr': 'Activé'
+            },
+            'disabled': {
+              'default': 'Disabled',
+              'en': 'Disabled',
+              'fr': 'Désactivé'
+            }
+          },
+          notify: true
+      },
+
+      /**
+      * Localization.
+      * fr, en.
+      *
+      * @attribute language
+      * @type String
+      */
+      language: {
+          type: String,
+          notify: true,
+          observer: "_languageChanged"
+      }
+
+	  },
+
+	  listeners: {
+
+	  },
+
+	  observers: [
+			'_enabledChanged( attribute.enabled )'
+	  ],
+
+	  ready: function(){
+
+	  },
+
+    /**
+    * Triggered when the language option is changed.
+    * Switches every text into the new language.
+    *
+    * @method _languageChanged
+    */
+    _languageChanged: function(){
+      for(var prop in this._i18n) {
+        var tmp = "_i18n."+prop+".default";
+        this.set(tmp, this._i18n[prop][this.language]);
+      }
+    },
+
+    _switchEnabledStatus: function(){
+      this.enabled = !this.enabled;
+      this.attribute.enabled = this.enabled;
+
+      if( this.enabled ){
+        this.$.rightPanel.style.backgroundColor = "#87D37C";
+        this._enabledMessage = this._i18n.enabled.default;
+      }
+      else{
+        this.$.rightPanel.style.backgroundColor = "#ef5e4a";
+        this._enabledMessage = this._i18n.disabled.default;
+      }
+    },
+
+    _attributeChanged: function(){
+      if(this.attribute.name){
+
+        this.enabled = this.attribute.enabled;
+
+				for(var i = 0; i < this.$.datatypeSelect.options.length; i++)
+					this.$.datatypeSelect.options[ i ].selected = false;
+				switch( this.attribute.datatype ){
+					case "xsd:string":
+						this.$.datatypeSelect.options[ 0 ].selected = true;
+					break;
+					case "xsd:decimal":
+						this.$.datatypeSelect.options[ 1 ].selected = true;
+					break;
+					case "json":
+						this.$.datatypeSelect.options[ 2 ].selected = true;
+					break;
+					default:
+						this.$.datatypeSelect.options[ 0 ].selected = true;
+					break;
+				}
+
+      }
+    },
+
+		_enabledChanged: function(){
+			this.enabled = this.attribute.enabled;
+
+			if( this.enabled ){
+        this.$.rightPanel.style.backgroundColor = "#87D37C";
+        this._enabledMessage = "enabled";
+      }
+      else{
+        this.$.rightPanel.style.backgroundColor = "#ef5e4a";
+				this._enabledMessage = "disabled";
+      }
+		}
+
+	});
+  	</script>
+
+</dom-module>

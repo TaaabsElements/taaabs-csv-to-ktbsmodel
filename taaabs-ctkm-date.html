@@ -1,0 +1,611 @@
+<link rel="import" href="../taaabs-themes/taaabs-dark-theme.html">
+<dom-module id="taaabs-ctkm-date">
+  <template>
+    <style include="taaabs-dark-theme"></style>
+    <style>
+      :host{
+        width: 100%;
+      }
+      :host .editIcons{
+        float:right;
+        cursor: pointer;
+      }
+      :host #container{
+        margin: 0 auto;
+        max-width: 1000px;
+      }
+
+      /*/////////*/
+      /* TIMEDIV */
+      /*/////////*/
+
+      :host #timeDiv{
+        opacity: 0;
+        pointer-events: none;
+
+        -webkit-transition: opacity 0.25s ease-in-out;
+        -moz-transition: opacity 0.25s ease-in-out;
+        -o-transition: opacity 0.25s ease-in-out;
+        -ms-transition: opacity 0.25s ease-in-out;
+      }
+
+      :host .tableRow{
+        display: table;
+        table-layout: fixed;
+        width: 100%;
+        padding: 1em 0 1em 0;
+      }
+
+      :host .tableCell{
+        display: table-cell;
+        width: 50%;
+      }
+
+      :host #bPreview, #ePreview{
+        display: block;
+        max-height: 6em;
+        height: 6em;
+        overflow-y: scroll;
+        line-height: 1.5em;
+      }
+
+      :host #bCustomFormatDiv, #eCustomFormatDiv{
+        -webkit-transition: opacity 0.25s ease-in-out;
+        -moz-transition: opacity 0.25s ease-in-out;
+        -o-transition: opacity 0.25s ease-in-out;
+        -ms-transition: opacity 0.25s ease-in-out;
+      }
+
+      :host #endTimeDivs{
+        pointer-events: none;
+        opacity: 0.37;
+
+        -webkit-transition: opacity 0.25s ease-in-out;
+        -moz-transition: opacity 0.25s ease-in-out;
+        -o-transition: opacity 0.25s ease-in-out;
+        -ms-transition: opacity 0.25s ease-in-out;
+      }
+
+    </style>
+
+    <div id="container" style="">
+      <iron-icon icon="icons:check" class="editIcons fgGreen fgGreenH" on-click="_submit"></iron-icon>
+      <h4> Définition de la mesure de temporalité des traces : </h4>
+
+      <!-- ORDER/TIME RADIO BUTTONS -->
+      <div style="padding:1em 0 1em 0;border-bottom:solid 1px grey;">
+        <input type="radio" name="size" id="orderRadio" on-click="_useOrderClicked" checked></input>
+        <label for="orderRadio">Utiliser l'order d'apparition des obsels.</label><br/>
+        <input type="radio" name="size" id="timeRadio" on-click="_useTimeClicked" on-click="_useTimeClicked" ></input>
+        <label for="timeRadio">Utiliser une valeur présente dans les traces.</label>
+      </div>
+
+      <div id="timeDiv" style="padding:1em 0 1em 0;border-bottom:solid 1px grey; margin: 0 auto; max-width: 1000px">
+
+        <!-- BEGIN TIME DIV -->
+        <div class="tableRow">
+          <span class="tableCell">
+            Colonne de temps de début :
+          </span>
+          <div class="tableCell">
+            <select id="bColumnSelector" title="Colonne de dates" on-change="_bColumnSelectorChanged">
+
+            </select>
+          </div>
+        </div>
+        <div class="tableRow">
+          <span class="tableCell">
+           Exemples provenant du fichier de trace:
+          </span>
+          <div class="tableCell">
+            <div id="bPreview"></div>
+          </div>
+        </div>
+        <div class="tableRow">
+          <span class="tableCell" style="width:10%">
+           Format:
+          </span>
+          <div class="tableCell" style="width:40%; padding-right: 1em">
+            <select id="bFormatSelector" title="format de date" on-change="_bFormatSelectorChanged">
+              <option selected value="custom">custom</option>
+              <option value="milliseconds">milliseconds</option>
+              <option value="standard">standard</option>
+            </select>
+          </div>
+          <div class="tableCell" style="width:45%">
+            <span id="bFormatSample">example: the 8-01, in 2016 at 8h30'.</span>
+          </div>
+          <div class="tableCell" style="width:5%">
+            <iron-icon icon="icons:help-outline" title="symbols" class="fgDarkBlue fgDarkBlueH" style="float:right; cursor:pointer"></iron-icon>
+          </div>
+        </div>
+        <div class="tableRow" id="bCustomFormatDiv">
+          <span class="tableCell">
+           Format personnalisé:
+          </span>
+          <div class="tableCell">
+            <input class="inputWithIcon" value="{{beginFormat::input}}">
+              <iron-icon class="inputWithIconIcon fgDarkBlue" icon="icons:create"></iron-icon>
+            </input>
+          </div>
+        </div>
+        <div class="tableRow">
+          <div class="tableCell">
+            <input type="checkbox" id="useEndTime" on-click="_useEndTimeClicked" checked></input>
+            <label>Utiliser la même valeur pour les temps de début et de fin des obsels.</label>
+          </div>
+        </div>
+
+        <!-- END TIME DIV -->
+        <div id="endTimeDivs">
+          <div class="tableRow">
+            <span class="tableCell">
+              Colonne de temps de début :
+            </span>
+            <div class="tableCell">
+              <select id="eColumnSelector" title="Colonne de dates" on-change="_eColumnSelectorChanged">
+
+              </select>
+            </div>
+          </div>
+          <div class="tableRow">
+            <span class="tableCell">
+             Exemples provenant du fichier de trace:
+            </span>
+            <div class="tableCell">
+              <div id="ePreview"></div>
+            </div>
+          </div>
+          <div class="tableRow">
+            <span class="tableCell" style="width:10%">
+             Format:
+            </span>
+            <div class="tableCell" style="width:40%; padding-right: 1em">
+              <select id="eFormatSelector" title="format de date" on-change="_eFormatSelectorChanged">
+                <option selected value="custom">custom</option>
+                <option value="milliseconds">milliseconds</option>
+                <option value="standard">standard</option>
+              </select>
+            </div>
+            <div class="tableCell" style="width:45%">
+              <span id="eFormatSample">example: the 8-01, in 2016 at 8h30'.</span>
+            </div>
+            <div class="tableCell" style="width:5%">
+              <iron-icon icon="icons:help-outline" title="symbols" class="fgDarkBlue fgDarkBlueH" style="float:right; cursor:pointer"></iron-icon>
+            </div>
+          </div>
+          <div class="tableRow" id="eCustomFormatDiv">
+            <span class="tableCell">
+             Format personnalisé:
+            </span>
+            <div class="tableCell">
+              <input class="inputWithIcon" value="{{endFormat::input}}">
+                <iron-icon class="inputWithIconIcon fgDarkBlue" icon="icons:create"></iron-icon>
+              </input>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+<!--
+  <h5>symboles</h5>
+  <span style="font-weight: bold; color: #D91E18"> 'D' : Jour </span> <span style="font-weight: bold; color: #F89406"> 'H' : Heures </span> <br/>
+  <span style="font-weight: bold; color: #446CB3"> 'M' : Mois </span> <span style="font-weight: bold; color: #19B5FE"> 'm' : Minutes </span> <br/>
+  <span style="font-weight: bold; color: #26A65B"> 'Y' : Année </span> <span style="font-weight: bold; color: #9A12B3"> 'S' : Secondes </span> <br/>
+  <span style="font-weight: bold; color: grey"> '.' : Ignorer </span> <span style="font-weight: bold; color: #00B16A"> 'm' : Millisecondes </span> <br/>
+-->
+
+  </template>
+  <script>
+    /* global Polymer */
+
+    /**
+    *
+    */
+    Polymer({
+      is: 'taaabs-ctkm-date',
+
+      properties: {
+
+        // --- Return vars
+
+        columnForBegin: {
+          type: Number,
+          notify: true,
+          reflectToAttribute: true,
+          value: -1
+        },
+
+        columnForEnd: {
+          type: Number,
+          notify: true,
+          reflectToAttribute: true,
+          value: -1
+        },
+
+        beginFormat: {
+          type: String,
+          notify: true,
+          value: '',
+          observer: "_bCustomFormatChanged"
+        },
+
+        endFormat: {
+          type: String,
+          notify: true,
+          reflectToAttribute: true,
+          value: ''
+        },
+
+        // --- Inner vars
+
+        collector: {
+          type: Object,
+          notify: true
+        },
+
+        bSampleDates: {
+          type: Array,
+          notify: true
+        },
+
+        eSampleDates: {
+          type: Array,
+          notify: true
+        },
+
+        formatChoiceSelected: {
+          type: Number,
+          notify: true,
+          value: 0
+        },
+
+        bCustomFormatSelected: {
+          type: Boolean,
+          notify: true,
+          value: false
+        },
+
+        eCustomFormatSelected: {
+          type: Boolean,
+          notify: true,
+          value: false
+        },
+
+        bCustomFormat: {
+          type: String,
+          notify: true,
+          value: '',
+
+        },
+
+        eCustomFormat: {
+          type: String,
+          notify: true,
+          value: '',
+          observer: "_eCustomFormatChanged"
+        },
+
+      },
+
+      ready: function() {
+      },
+
+      initTime: function(){
+        if( this.csvSchema.time ){
+
+          this._getAllColumns();
+
+          if( this.csvSchema.time.beginColumn !== -1 ){
+
+            this._initBeginColumn();
+
+            if( this.csvSchema.time.endColumn !== -1 ){
+
+              this._initEndColumn();
+
+            }
+          }
+        }
+      },
+
+      _initBeginColumn: function(){
+        this.set('columnForBegin', this.csvSchema.time.beginColumn);
+
+        this.$.bColumnSelector.options[0].selected = false;
+        this.$.bColumnSelector.options[this.columnForBegin].selected = true;
+        this._bColumnSelectorChanged();
+
+        this.set('beginFormat', this.csvSchema.time.beginFormat);
+
+        this.$.timeDiv.style.opacity = 1;
+        this.$.timeDiv.style.pointerEvents = "auto";
+
+        this.$.timeRadio.checked = true;
+        this.$.orderRadio.checked = false;
+
+
+      },
+
+      _initEndColumn: function(){
+        this.set('columnForEnd', this.csvSchema.time.endColumn);
+
+        this.$.eColumnSelector.options[0].selected = false;
+        this.$.eColumnSelector.options[this.columnForEnd].selected = true;
+        this._eColumnSelectorChanged();
+
+        this.set('endFormat', this.csvSchema.time.endFormat);
+
+        this.$.useEndTime.checked = false;
+
+
+      },
+
+      _useOrderClicked: function(){
+        this.$.timeDiv.style.opacity = 0;
+        this.$.timeDiv.style.pointerEvents = "none";
+
+        this.columnForBegin = -1;
+        this.columnForEnd = -1;
+        this.beginFormat = '';
+        this.endFormat = '';
+      },
+
+      _useTimeClicked: function(){
+        this.$.timeDiv.style.opacity = 1;
+        this.$.timeDiv.style.pointerEvents = "auto";
+
+        this._getAllColumns();
+
+        this.columnForBegin = parseInt( this.$.bColumnSelector.options[this.$.bColumnSelector.selectedIndex].value );
+      },
+
+      _getAllColumns: function(){
+        this.$.bColumnSelector.innerHTML = "";
+        this.$.eColumnSelector.innerHTML = "";
+        var columns = this.csvSchema.columns;
+        for(var i = 0 ; i < columns.length ; i++){
+          var opt = document.createElement('option');
+          opt.value = i;
+          opt.textContent = columns[i].name;
+          if(i===0)
+            opt.selected = true;
+          var eopt = opt.cloneNode();
+          eopt.textContent = columns[i].name;
+          this.$.bColumnSelector.appendChild(opt);
+          this.$.eColumnSelector.appendChild(eopt);
+        }
+        this._bColumnSelectorChanged();
+      },
+
+      _bColumnSelectorChanged: function(){
+
+        this.columnForBegin = parseInt( this.$.bColumnSelector.options[this.$.bColumnSelector.selectedIndex].value );
+        this.set('bSampleDates', []);
+
+        // Create a pointer to `this` for later.
+        var that = this;
+
+        // Create a callback object for the file reader.
+        var callback = {
+          onload: function(evt){
+
+            //parse the lines from the trace file and go to _updateSample
+            var worker = new Worker(that.resolveUrl('csvToArray.js'));
+            worker.addEventListener('message', function(e) {
+                var parsedSample = e.data;
+
+                that.$.bPreview.innerHTML = "";
+
+                for(var i = 1; i < parsedSample.length ; i++){
+                  var div = document.createElement('div');
+                  div.textContent = parsedSample[i][that.columnForBegin];
+                  that.$.bPreview.appendChild(div);
+                  that.push('bSampleDates', parsedSample[i][that.columnForBegin]);
+                }
+
+              }, false);
+            worker.postMessage({strData: evt.target.result, strDelimiter: that.csvSchema.separator});
+          },
+          onerror: function(evt){
+            console.log('error');
+            console.log(evt);
+          },
+          onprogress: function(evt){ }
+        }
+
+        //Get a few lines form the trace file.
+        that.fileReader.getSample(0, callback);
+      },
+
+      _eColumnSelectorChanged: function(){
+
+        this.columnForEnd = parseInt( this.$.eColumnSelector.options[this.$.eColumnSelector.selectedIndex].value );
+        this.set('eSampleDates', []);
+
+        // Create a pointer to `this` for later.
+        var that = this;
+
+        // Create a callback object for the file reader.
+        var callback = {
+          onload: function(evt){
+
+            //parse the lines from the trace file and go to _updateSample
+            var worker = new Worker(that.resolveUrl('csvToArray.js'));
+            worker.addEventListener('message', function(e) {
+                var parsedSample = e.data;
+
+                that.$.ePreview.innerHTML = "";
+
+                for(var i = 1; i < parsedSample.length ; i++){
+                  var div = document.createElement('div');
+                  div.textContent = parsedSample[i][that.columnForEnd];
+                  that.$.ePreview.appendChild(div);
+                  that.push('eSampleDates', parsedSample[i][that.columnForEnd]);
+                }
+
+              }, false);
+            worker.postMessage({strData: evt.target.result, strDelimiter: that.csvSchema.separator});
+          },
+          onerror: function(evt){
+            console.log('error');
+            console.log(evt);
+          },
+          onprogress: function(evt){ }
+        }
+
+        //Get a few lines form the trace file.
+        that.fileReader.getSample(0, callback);
+      },
+
+      _bFormatSelectorChanged: function(){
+        var format = this.$.bFormatSelector.options[this.$.bFormatSelector.selectedIndex].value;
+        if(format === "custom"){
+          this.$.bFormatSample.textContent = "example:  the 8-01, in 2016 at 8h30'.";
+          this.$.bCustomFormatDiv.style.opacity = 1;
+          this.$.bCustomFormatDiv.style.pointerEvents = "auto";
+        }
+        else if(format === "milliseconds"){
+          this.$.bFormatSample.textContent = "10 - 13 figures number.";
+          this.$.bCustomFormatDiv.style.opacity = 0.37;
+          this.$.bCustomFormatDiv.style.pointerEvents = "none";
+        }
+        else if(format === "standard"){
+          this.$.bFormatSample.textContent = "example: 1995-12-17T03:24:00";
+          this.$.bCustomFormatDiv.style.opacity = 0.37;
+          this.$.bCustomFormatDiv.style.pointerEvents = "none";
+        }
+      },
+
+      _eFormatSelectorChanged: function(){
+        var format = this.$.eFormatSelector.options[this.$.eFormatSelector.selectedIndex].value;
+        if(format === "custom"){
+          this.$.eFormatSample.textContent = "example:  the 8-01, in 2016 at 8h30'.";
+          this.$.eCustomFormatDiv.style.opacity = 1;
+          this.$.eCustomFormatDiv.style.pointerEvents = "auto";
+        }
+        else if(format === "milliseconds"){
+          this.$.eFormatSample.textContent = "10 - 13 figures number.";
+          this.$.eCustomFormatDiv.style.opacity = 0.37;
+          this.$.eCustomFormatDiv.style.pointerEvents = "none";
+        }
+        else if(format === "standard"){
+          this.$.eFormatSample.textContent = "example: 1995-12-17T03:24:00";
+          this.$.eCustomFormatDiv.style.opacity = 0.37;
+          this.$.eCustomFormatDiv.style.pointerEvents = "none";
+        }
+      },
+
+      _useEndTimeClicked: function(e){
+        if(e.target.checked){
+          this.$.endTimeDivs.style.opacity = 0.37;
+          this.$.endTimeDivs.style.pointerEvents = "none";
+        }
+        else{
+          this.$.endTimeDivs.style.opacity = 1;
+          this.$.endTimeDivs.style.pointerEvents = "auto";
+        }
+      },
+
+
+
+      _bCustomFormatChanged: function(){
+        if( this.beginFormat !== '' ){
+          this.$.bPreview.innerHTML = "";
+          var symbolsColor = {
+            'D' : '#D91E18',
+            'M' : '#446CB3',
+            'Y' : '#26A65B',
+            'H' : '#F89406',
+            'm' : '#19B5FE',
+            'S' : '#9A12B3',
+            's' : '#00B16A',
+            '.' : 'grey'
+          };
+          for(var i = 0 ; i < this.bSampleDates.length; i++){
+
+            var match = this.bSampleDates[i].match(/\d+/g);
+            var rest = this.bSampleDates[i].split(/\d+/);
+
+            var div = document.createElement('div');
+            for(var j = 0; j < rest.length; j++){
+              var spanRest = document.createElement('span');
+              spanRest.textContent = rest[j];
+              if( j < match.length ){
+                var spanMatch = document.createElement('span');
+                spanMatch.textContent = match[j];
+                if( j < this.beginFormat.length){
+                  spanMatch.style.color = symbolsColor[this.beginFormat[j]] || 'black';
+                  spanMatch.style.fontWeight = 'bold';
+                }
+              }
+              div.appendChild(spanRest);
+              div.appendChild(spanMatch);
+            }
+            this.$.bPreview.appendChild(div);
+          }
+        }
+      },
+
+      _eCustomFormatChanged: function(){
+        if( this.endFormat !== '' ){
+          this.$.ePreview.innerHTML = "";
+          var symbolsColor = {
+            'D' : '#D91E18',
+            'M' : '#446CB3',
+            'Y' : '#26A65B',
+            'H' : '#F89406',
+            'm' : '#19B5FE',
+            'S' : '#9A12B3',
+            's' : '#00B16A',
+            '.' : 'grey'
+          };
+          for(var i = 0 ; i < this.eSampleDates.length; i++){
+
+            var match = this.eSampleDates[i].match(/\d+/g);
+            var rest = this.eSampleDates[i].split(/\d+/);
+
+            var div = document.createElement('div');
+            for(var j = 0; j < rest.length; j++){
+              var spanRest = document.createElement('span');
+              spanRest.textContent = rest[j];
+              if( j < match.length ){
+                var spanMatch = document.createElement('span');
+                spanMatch.textContent = match[j];
+                if( j < this.endFormat.length){
+                  spanMatch.style.color = symbolsColor[this.endFormat[j]] || 'black';
+                  spanMatch.style.fontWeight = 'bold';
+                }
+              }
+              div.appendChild(spanRest);
+              div.appendChild(spanMatch);
+            }
+            this.$.ePreview.appendChild(div);
+          }
+        }
+      },
+
+      _displayDateInfos: function(){
+        this.$.lightbackground.style.display = 'block';
+        this.$.lightbox.style.display = 'block';
+      },
+
+      _removeDateInfos: function(){
+        this.$.lightbackground.style.display = 'none';
+        this.$.lightbox.style.display = 'none';
+      },
+
+      _submit: function(){
+        console.log(this.csvSchema);
+        this.fire('TIME_SET', {time: {
+          beginColumn: this.columnForBegin,
+          endColumn: this.columnForEnd,
+          beginFormat: this.beginFormat,
+          endFormat: this.endFormat
+        }});
+      }
+
+});
+</script>
+</dom-module>

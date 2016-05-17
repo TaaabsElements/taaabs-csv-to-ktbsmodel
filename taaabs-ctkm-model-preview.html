@@ -1,0 +1,231 @@
+<link rel="import" href="../taaabs-themes/taaabs-dark-theme.html">
+<dom-module id="taaabs-ctkm-model-preview">
+  <template>
+    <style include="taaabs-dark-theme"></style>
+    <style>
+      :host{
+        width: 100%;
+      }
+
+      :host #container{
+        margin: 0 auto;
+        max-width: 1000px;
+      }
+
+      :host .subTitle{
+        text-transform: uppercase;
+        font-weight: normal;
+        font-size: 10px;
+      }
+
+      :host #createBtn{
+        padding: 1em 5em 1em 5em;
+        margin: 0 auto;
+        display: block;
+      }
+
+
+
+    </style>
+
+    <div id="container">
+      <h4> Create your kTBS model ( <span class="subTitle">[[csvSchema.id]]</span> )</h4>
+
+      <div class="button" id="createBtn" on-click="_submit">Create</div>
+
+      <div id="typesRow" style="display:block; max-width: 100%; overflow-x: scroll;margin-top: 2em">
+        <div style="position: relative; width: 100%;  display: table;">
+          <template is="dom-repeat" items="[[csvSchema.typesObjects]]">
+            <template is="dom-if" if="[[item.enabled]]">
+              <div style="display: table-cell; min-width: 300px">
+                <div style=" display:block; padding: 1em; width: 100%;" class="fgWhite bgDarkBlue">
+                  <span> [[item.name]] ( [[item.title]])</span>
+                </div>
+              </template>
+            </div>
+          </template>
+        </div>
+      </div>
+      <div id="attributesRow" style="display:block; max-width: 100%; overflow-x: hidden;">
+        <div style="position: relative; width: 100%;  display: table;">
+          <template is="dom-repeat" items="[[csvSchema.typesObjects]]">
+            <template is="dom-if" if="[[item.enabled]]">
+              <div style="display: table-cell; min-width: 300px">
+                <template is="dom-repeat" items="[[item.attributes]]">
+                  <template is="dom-if" if="[[item.enabled]]">
+                    <div style="display:block; padding: 1em; border-bottom: solid 1px grey;border-left: solid1px grey; width: 100%;">
+                      <span> [[item.name]] </span><br/>
+                      <span> [[item.datatype]] </span>
+                    </div>
+                  </template>
+                </template>
+              </template>
+            </div>
+          </template>
+        </div>
+      </div>
+    </div>
+
+
+
+
+  </template>
+  <script>
+    /* global Polymer */
+
+    /**
+    *
+    */
+    Polymer({
+      is: 'taaabs-ctkm-model-preview',
+
+      properties: {
+
+        csvSchema:{
+          type: Object,
+        }
+
+      },
+
+      ready: function() {
+
+        var that = this;
+
+        // Link the scroll status between the different panes.
+        this.$.typesRow.addEventListener('scroll', function(e){
+          that.$.attributesRow.scrollLeft = that.$.typesRow.scrollLeft;
+        })
+
+      },
+
+
+      _submit: function(){
+        var that = this;
+
+        console.log( that.csvSchemas );
+
+
+        var csvContent = JSON.stringify( that.csvSchemas );
+        var new_attr = [["http://taaabs-hubble/onto#csvCollectorSchemas",csvContent]];
+
+
+        that.base.modify_attributes(new_attr)
+          .then(function(data){
+            that._createModel();
+          })
+          .catch(function(data){
+            console.log(data)
+          });
+
+
+      },
+
+      _createModel: function(){
+
+        var that = this;
+
+        var unit = null;
+        if(this.csvSchema.time.beginColumn === -1)
+          unit = 'order of appearance';
+
+        this.base.create_model( that.csvSchema.id, that.csvSchema.label, "A model programmatically created from a taaabs csv collector." , unit)
+            .then( function(model){
+
+              console.log(model);
+
+              var _typeGraph = [];
+              var _attrGraph = [];
+
+              for(var i = 0; i < that.csvSchema.typesObjects.length; i++){
+
+                if( that.csvSchema.typesObjects[i].enabled ){
+
+                    var type = {
+                      "@id": '#'+that.csvSchema.typesObjects[i].name,
+                      "@type": "ObselType"
+                    }
+
+                    _typeGraph.push(type);
+
+                    for(var j = 0; j < that.csvSchema.typesObjects[i].attributes.length; j++){
+                      if( that.csvSchema.typesObjects[i].attributes[j].enabled ){
+                        var exists = false;
+                        for(var k = 0; k< _attrGraph.length; k++){
+                          if( _attrGraph[k]['@id'] === '#'+that.csvSchema.typesObjects[i].attributes[j].name ){
+                             _attrGraph[k]['hasAttributeObselType'].push('#'+that.csvSchema.typesObjects[i].name);
+                             exists = true;
+                          }
+                        }
+                        if( !exists ){
+                          var attr = {
+                            "@id": '#'+that.csvSchema.typesObjects[i].attributes[j].name.replace(' ',''),
+                            "@type": "AttributeType" ,
+                            "hasAttributeObselType": ['#'+that.csvSchema.typesObjects[i].name] ,
+                            "hasAttributeDatatype": [that.csvSchema.typesObjects[i].attributes[j].datatype] ,
+                          }
+                          _attrGraph.push(attr);
+                        }
+
+                      }
+
+                    }
+                }
+
+
+
+              }
+              if( that.csvSchema.typesObjects.length === 0 ){
+                // TODO, ADD CONDITION....
+                var type = {
+                  "@id": '#defaultType',
+                  "@type": "ObselType"
+                }
+
+                _typeGraph.push(type);
+
+                for(var j = 0; j< that.csvSchema.columns.length; j++){
+                  var attr = {
+                    "@id": '#'+that.csvSchema.columns[j].name,
+                    "@type": "AttributeType" ,
+                    "hasAttributeObselType": ['#defaultType'] ,
+                    "hasAttributeDatatype": ['xsd:string'] ,
+                  }
+                  _attrGraph.push(attr);
+                }
+              }
+
+              model.load()
+                  .then( function(){
+                    var graph = [];
+                    graph.push( model.list_type_obsels[0] );
+                    for(var i = 0 ; i < _typeGraph.length; i++)
+                      graph.push(_typeGraph[i]);
+                    for(var i = 0 ; i < _attrGraph.length; i++)
+                      graph.push(_attrGraph[i]);
+
+                    console.log(graph);
+                    model.put_model(graph)
+                      .then( function(){
+                        console.log(model);
+                        that.fire('MODEL_CREATED');
+                      })
+                      .catch( function(err){
+                        console.log(err);
+                      })
+                  })
+                  .catch( function(err){
+                    console.log(err);
+                  })
+
+            })
+            .catch( function(err){
+              console.log(err);
+            })
+
+
+      },
+
+
+});
+</script>
+</dom-module>

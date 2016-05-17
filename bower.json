@@ -1,0 +1,27 @@
+{
+  "name": "taaabs-csv-to-ktbsmodel",
+  "version": "1.0.0",
+  "description": "A graphical element in which the user can edit the corresponding trace model of a trace csv file.",
+  "keywords": [
+    "web-components",
+    "polymer",
+    "taaabs"
+  ],
+  "authors": [
+    "Rémi Casado"
+  ],
+  "repository": {
+   "type": "git",
+   "url": "https://github.com/TaaabsElements/taaabs-csv-to-ktbsmodel.git"
+  },
+  "main": "taaabs-csv-to-ktbsmodel.html",
+  "license": "https://github.com/TaaabsElements/taaabs-csv-to-ktbsmodel/LICENSE",
+  "dependencies": {
+    "polymer": "polymer/polymer#^1.0.0"
+  },
+  "devDependencies": {
+    "iron-component-page": "polymerelements/iron-component-page#^1.0.0",
+    "webcomponentsjs": "webcomponents/webcomponentsjs#^0.7.0"
+  },
+  "ignore": []
+}
