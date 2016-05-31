@@ -241,6 +241,10 @@
         // When the user finished a model edition.
         this.$.tcme.addEventListener('MODEL_SET', function(e){
           that._goToPage(3);
+
+          console.log( that.csvSchema );
+          console.log(e.detail);
+
           that.csvSchema.typesObjects = e.detail.typesObjects;
           that.csvSchema.typeColumn = e.detail.typeColumn;
           that.$.tcd.initTime();
@@ -256,6 +260,21 @@
         this.$.tcmp.addEventListener('MODEL_CREATED', function(){
           that._goToPage(5);
         })
+
+        // When the user chooses to continue the upload process.
+        this.$.tccfi.addEventListener('SAVE_NEXT', function(){
+          that._saveAndNextStep();
+        })
+      },
+
+      /**
+      * Upload `csvSchema` to the `base` and call `nextStepFunction`.
+      *
+      * @method _saveAndNextStep
+      * @see `nextStepFunction`
+      */
+      _saveAndNextStep: function(){
+        that.fire('SAVE_NEXT');
       },
 
       //////////////////////////

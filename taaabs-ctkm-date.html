@@ -470,11 +470,15 @@
           this.$.bFormatSample.textContent = "10 - 13 figures number.";
           this.$.bCustomFormatDiv.style.opacity = 0.37;
           this.$.bCustomFormatDiv.style.pointerEvents = "none";
+
+          this.set('beginFormat', "milliseconds");
         }
         else if(format === "standard"){
           this.$.bFormatSample.textContent = "example: 1995-12-17T03:24:00";
           this.$.bCustomFormatDiv.style.opacity = 0.37;
           this.$.bCustomFormatDiv.style.pointerEvents = "none";
+
+          this.set('beginFormat', "standard");
         }
       },
 
@@ -489,11 +493,15 @@
           this.$.eFormatSample.textContent = "10 - 13 figures number.";
           this.$.eCustomFormatDiv.style.opacity = 0.37;
           this.$.eCustomFormatDiv.style.pointerEvents = "none";
+
+          this.set('endFormat', "milliseconds");
         }
         else if(format === "standard"){
           this.$.eFormatSample.textContent = "example: 1995-12-17T03:24:00";
           this.$.eCustomFormatDiv.style.opacity = 0.37;
           this.$.eCustomFormatDiv.style.pointerEvents = "none";
+
+          this.set('endFormat', "standard");
         }
       },
 
