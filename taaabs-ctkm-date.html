@@ -116,7 +116,6 @@
             <span id="bFormatSample">example: the 8-01, in 2016 at 8h30'.</span>
           </div>
           <div class="tableCell" style="width:5%">
-            <iron-icon icon="icons:help-outline" title="symbols" class="fgDarkBlue fgDarkBlueH" style="float:right; cursor:pointer"></iron-icon>
           </div>
         </div>
         <div class="tableRow" id="bCustomFormatDiv">
@@ -128,6 +127,13 @@
               <iron-icon class="inputWithIconIcon fgDarkBlue" icon="icons:create"></iron-icon>
             </input>
           </div>
+        </div>
+        <div class="tableRow">
+          <h5>symboles</h5>
+          <span style="font-weight: bold; color: #D91E18"> 'D' : Jour </span> <span style="font-weight: bold; color: #F89406"> 'H' : Heures </span> <br/>
+          <span style="font-weight: bold; color: #446CB3"> 'M' : Mois </span> <span style="font-weight: bold; color: #19B5FE"> 'm' : Minutes </span> <br/>
+          <span style="font-weight: bold; color: #26A65B"> 'Y' : Année </span> <span style="font-weight: bold; color: #9A12B3"> 'S' : Secondes </span> <br/>
+          <span style="font-weight: bold; color: grey"> '.' : Ignorer </span> <span style="font-weight: bold; color: #00B16A"> 'm' : Millisecondes </span> <br/>
         </div>
         <div class="tableRow">
           <div class="tableCell">
@@ -187,14 +193,6 @@
         </div>
       </div>
     </div>
-
-<!--
-  <h5>symboles</h5>
-  <span style="font-weight: bold; color: #D91E18"> 'D' : Jour </span> <span style="font-weight: bold; color: #F89406"> 'H' : Heures </span> <br/>
-  <span style="font-weight: bold; color: #446CB3"> 'M' : Mois </span> <span style="font-weight: bold; color: #19B5FE"> 'm' : Minutes </span> <br/>
-  <span style="font-weight: bold; color: #26A65B"> 'Y' : Année </span> <span style="font-weight: bold; color: #9A12B3"> 'S' : Secondes </span> <br/>
-  <span style="font-weight: bold; color: grey"> '.' : Ignorer </span> <span style="font-weight: bold; color: #00B16A"> 'm' : Millisecondes </span> <br/>
--->
 
   </template>
   <script>
@@ -285,7 +283,7 @@
           notify: true,
           value: '',
           observer: "_eCustomFormatChanged"
-        },
+        }
 
       },
 

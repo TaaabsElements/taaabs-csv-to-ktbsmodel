@@ -5,52 +5,50 @@
 
     <style include="taaabs-dark-theme"></style>
     <style>
-
-      :host{
+      :host {
         width: 100%;
         display: block
       }
 
-      :host #container{
+      :host #container {
         max-width: 1000px;
         margin: 0 auto;
       }
 
-      :host .attributesRow:nth-child(2n + 1), .typesRow:nth-child(2n + 1) {
+      :host .attributesRow:nth-child(2n + 1),
+      .typesRow:nth-child(2n + 1) {
         background-color: rgba(144, 144, 144, 0.25);
       }
 
-      :host .editIcons{
-        float:right;
+      :host .editIcons {
+        float: right;
         cursor: pointer;
       }
 
-      :host .subTitle{
+      :host .subTitle {
         text-transform: uppercase;
         font-weight: normal;
         font-size: 10px;
       }
 
-      :host #typesEditorPane{
+      :host #typesEditorPane {
         opacity: 0;
-
         -webkit-transition: opacity 0.25s ease-in-out;
         -moz-transition: opacity 0.25s ease-in-out;
         -o-transition: opacity 0.25s ease-in-out;
         -ms-transition: opacity 0.25s ease-in-out;
       }
 
-      :host #samplePane{
+      :host #samplePane {
         -webkit-transition: height 0.25s ease-in-out;
         -moz-transition: height 0.25s ease-in-out;
         -o-transition: height 0.25s ease-in-out;
         -ms-transition: height 0.25s ease-in-out;
       }
-
     </style>
 
     <div id="container">
-      <iron-icon icon="icons:check" class="editIcons fgGreen fgGreenH" title="{{_i18n.editSubmitIcon.default}}" on-click="_submit"></iron-icon>
+      <iron-icon icon="icons:check" class="editIcons fgGreen fgGreenH" on-click="_submit"></iron-icon>
       <h4> Edit your kTBS model ( <span class="subTitle">{{csvSchema.id}}</span> )</h4>
 
       <h5> Obsels type column </h5>
@@ -65,7 +63,9 @@
       <div id="samplePane" style="display:block;height:200px;width:100%;overflow-y:auto;padding:20px;">
         <table>
           <template is="dom-repeat" items="{{selectedColumnSample}}">
-            <tr> <td> <span>{{item}}</span> </td> </tr>
+            <tr>
+              <td> <span>{{item}}</span> </td>
+            </tr>
           </template>
         </table>
       </div>
@@ -78,7 +78,7 @@
     <div id="typesEditorPane">
 
       <div style="position:relative;display: block; float:left; min-width: 200px; max-width: 200px;  margin-left: 5%; z-index:200">
-        <div class="bgDarkBlue fgWhite" style="display:table-cell; min-width: 200px; max-width: 200px; padding: 1em;text-align:center;" >
+        <div class="bgDarkBlue fgWhite" style="display:table-cell; min-width: 200px; max-width: 200px; padding: 1em;text-align:center;">
           __types__
         </div>
       </div>
@@ -90,7 +90,8 @@
           </div>
           <template is="dom-repeat" items="{{csvSchema.columns}}">
             <div style="display:table-cell; width: 300px; padding: 1em 0.9em 1em 1em; text-align:center" class="bgDarkBlue fgWhite">
-              <input style="margin: 0; padding: 0" type="checkbox" on-click="_changeAllAttributeStatus" checked></input><label style="color:white; margin: 0; padding: 0; font-weight: 400; font-size: 100%">{{item.title}}</label>
+              <input style="margin: 0; padding: 0" type="checkbox" on-click="_changeAllAttributeStatus" checked></input>
+              <label style="color:white; margin: 0; padding: 0; font-weight: 400; font-size: 100%">{{item.title}}</label>
             </div>
           </template>
         </div>
@@ -99,10 +100,11 @@
       <div id="typesPanel" class="bgWhite" style="border-right: solid 1px #2E3842; position:relative;display: block; float:left; width: 200px; overflow-y: hidden; max-height: 700px; margin-left: 5%; z-index:200">
         <template is="dom-repeat" items="{{_typesObjects}}">
           <div class="typesRow" style="display:block; width: 100%; height: 166px; border-bottom: solid 1px grey;">
-             <input class="inputWithIcon" value="{{item.name::input}}">
-               <iron-icon class="inputWithIconIcon fgDarkBlue" icon="icons:create"></iron-icon>
-             </input>
-             <input type="checkbox" on-click="_typeEnabledClicked" checked="{{_isTypeEnabled(item)}}"></input><label>Enabled</label>
+            <input class="inputWithIcon" value="{{item.name::input}}">
+            <iron-icon class="inputWithIconIcon fgDarkBlue" icon="icons:create"></iron-icon>
+            </input>
+            <input type="checkbox" on-click="_typeEnabledClicked" checked="{{_isTypeEnabled(item)}}"></input>
+            <label>Enabled</label>
           </div>
         </template>
       </div>
@@ -122,422 +124,432 @@
         </div>
       </div>
     </div>
-    </template>
-    <script>
-      /* global Polymer */
+  </template>
+  <script>
+    /* global Polymer */
 
-      Polymer({
+    Polymer({
 
-        is: 'taaabs-ctkm-model-edit',
+      is: 'taaabs-ctkm-model-edit',
 
-        properties: {
+      properties: {
 
-          /**
-          * The list of types objects (obsel type + attributes).
-          *
-          * @attribute _typesObjects
-          * @type Array
-          */
-          _typesObjects: {
-            type: Array,
-            notify: true,
-            value: []
+        /**
+         * The list of types objects (obsel type + attributes).
+         *
+         * @attribute _typesObjects
+         * @type Array
+         */
+        _typesObjects: {
+          type: Array,
+          notify: true,
+          value: []
+        },
+
+        //////////////////
+        // PARSING VARS //
+        //////////////////
+
+        /**
+         * Last line of the parsed file.
+         *
+         * @attribute _remains
+         * @type String
+         */
+        _remains: {
+          type: String,
+          notify: true,
+          value: ""
+        },
+
+        /**
+         * Index of the currently parsed slice.
+         *
+         * @attribute _sliceIndex
+         * @type Number
+         */
+        _sliceIndex: {
+          type: Number,
+          notify: true,
+          value: 1
+        },
+
+        /**
+         * Number of slices of a file.
+         *
+         * @attribute _slicesCount
+         * @type Number
+         */
+        _slicesCount: {
+          type: Number,
+          notify: true,
+          value: -1
+        },
+
+        /**
+         * Index of the currently parsed file.
+         *
+         * @attribute _fileIndex
+         * @type Number
+         */
+        _fileIndex: {
+          type: Number,
+          notify: true,
+          value: -1
+        },
+
+        _continueParsing: {
+          type: Boolean,
+          notify: true,
+          value: false
+        },
+
+        /**
+         * Localization.
+         * fr, en.
+         *
+         * @attribute language
+         * @type String
+         */
+        language: {
+          type: String,
+          notify: true,
+        }
+      },
+
+      behaviors: [
+        Polymer.AppLocalizeBehavior
+      ],
+
+      ready: function() {
+
+        var that = this;
+
+        // Link the scroll status between the different panes.
+        this.$.attributesPanel.addEventListener('scroll', function(e) {
+          that.$.typesPanel.scrollTop = that.$.attributesPanel.scrollTop;
+        })
+        this.$.attributesTitle.addEventListener('scroll', function(e) {
+          that.$.attributesPanel.scrollLeft = that.$.attributesTitle.scrollLeft;
+        })
+
+      },
+
+      attached: function(){
+        // Load i18n json.
+        this.loadResources(this.resolveUrl('./locales.json'));
+      },
+
+
+      //////////////////////
+      // PROCES FUNCTIONS //
+      //////////////////////
+
+      /**
+       * Triggered when the value of `typeSelect` changes.
+       * Set `columnForType` and calls `updateSample`.
+       *
+       * @method _typeSelectChanged
+       */
+      _typeSelectChanged: function() {
+        var index = this.$.typeSelect.selectedIndex;
+        if (index === -1)
+          index = 0;
+        this.selectedColumn4Type = this.csvSchema.columns[parseInt(this.$.typeSelect.options[index].value)];
+        this.columnForType = parseInt(this.$.typeSelect.options[index].value);
+        this._updateSample();
+      },
+
+      /**
+       * Bound function to input `checked` status.
+       * Return `item`.enabled
+       *
+       * @method _isTypeEnabled
+       */
+      _isTypeEnabled: function(item) {
+        return item.enabled;
+      },
+
+      /**
+       * Enable/Disable a specific attribute from all the types.
+       *
+       * @method _changeAllAttributeStatus
+       */
+      _changeAllAttributeStatus: function(e) {
+        for (var i = 0; i < this._typesObjects.length; i++) {
+          this.set('_typesObjects.' + i + '.attributes.' + e.model.index + '.enabled', e.target.checked);
+        }
+      },
+
+      /**
+       * Triggered when the user clicks on the submit button.
+       * Fires the `MODEL_SET` event.
+       *
+       * @method _changeAllAttributeStatus
+       */
+      _submit: function() {
+        this.fire('MODEL_SET', {
+          typesObjects: this._typesObjects,
+          typeColumn: this.columnForType
+        });
+      },
+
+      _typeEnabledClicked: function(e) {
+        e.model.item.enabled = e.target.checked;
+      },
+
+      ///////////////////////
+      // PARSING FUNCTIONS //
+      ///////////////////////
+
+      /**
+       * Get the selected column values from a few lines of the trace file.
+       *
+       * @method _getSample
+       */
+      _getSample: function() {
+
+        // Create a pointer to `this` for later.
+        var that = this;
+
+        // Create a callback object for the file reader.
+        var callback = {
+          onload: function(evt) {
+
+            //parse the lines from the trace file and go to _updateSample
+            var worker = new Worker(that.resolveUrl('csvToArray.js'));
+            worker.addEventListener('message', function(e) {
+              var parsedSample = e.data;
+              that.parsedSample = parsedSample;
+              that._updateSample();
+            }, false);
+            worker.postMessage({
+              strData: evt.target.result,
+              strDelimiter: that.csvSchema.separator
+            });
           },
-
-          //////////////////
-          // PARSING VARS //
-          //////////////////
-
-          /**
-          * Last line of the parsed file.
-          *
-          * @attribute _remains
-          * @type String
-          */
-          _remains: {
-            type: String,
-            notify: true,
-            value: ""
+          onerror: function(evt) {
+            console.log('error');
+            console.log(evt);
           },
+          onprogress: function(evt) {}
+        }
 
-          /**
-          * Index of the currently parsed slice.
-          *
-          * @attribute _sliceIndex
-          * @type Number
-          */
-          _sliceIndex: {
-            type: Number,
-            notify: true,
-            value: 1
-          },
+        //Get a few lines form the trace file.
+        that.fileReader.getSample(0, callback);
+      },
 
-          /**
-          * Number of slices of a file.
-          *
-          * @attribute _slicesCount
-          * @type Number
-          */
-          _slicesCount: {
-            type: Number,
-            notify: true,
-            value: -1
-          },
+      /**
+       * Update the sample lines to display.
+       *
+       * @method _updateSample
+       */
+      _updateSample: function() {
 
-          /**
-          * Index of the currently parsed file.
-          *
-          * @attribute _fileIndex
-          * @type Number
-          */
-          _fileIndex: {
-            type: Number,
-            notify: true,
-            value: -1
-          },
+        // if the parsedSample as correctly been set.
+        if (this.parsedSample !== undefined) {
 
-          ///////////////
-          // _i18n VARS //
-          ///////////////
+          // Reset selectedColumnSample
+          this.set('selectedColumnSample', []);
 
-          /**
-          * Localization object.
-          *
-          * @attribute _i18n
-          * @type Object
-          */
-          _i18n: {
-              type: Object,
-              value: {
+          console.log(this.csvSchema);
 
-              },
-              notify: true
-          },
+          if (this.csvSchema.typeColumn && this.csvSchema.typeColumn !== -1) {
+            this.set('columnForType', this.csvSchema.typeColumn);
+            if (this.csvSchema.typesObjects) {
 
-          /**
-          * Localization.
-          * fr, en.
-          *
-          * @attribute language
-          * @type String
-          */
-          language: {
-              type: String,
-              notify: true,
-              observer: "_languageChanged"
+              this.$.typeSelect.options[0].selected = false;
+              this.$.typeSelect.options[this.csvSchema.typeColumn].selected = true;
+
+              this.set('_typesObjects', this.csvSchema.typesObjects);
+
+              this.$.typesEditorPane.style.opacity = 1;
+              this.$.samplePane.style.height = 0;
+            }
           }
-        },
-
-        ready: function(){
-
-          var that = this;
-
-          // Link the scroll status between the different panes.
-          this.$.attributesPanel.addEventListener('scroll', function(e){
-            that.$.typesPanel.scrollTop = that.$.attributesPanel.scrollTop;
-          })
-          this.$.attributesTitle.addEventListener('scroll', function(e){
-            that.$.attributesPanel.scrollLeft = that.$.attributesTitle.scrollLeft;
-          })
-
-
-        },
-
-        ///////////
-        // _i18n //
-        ///////////
-
-        /**
-        * Triggered when the language option is changed.
-        * Switches every text into the new language.
-        *
-        * @method _languageChanged
-        */
-        _languageChanged: function(){
-          for(var prop in this._i18n) {
-            var tmp = "_i18n."+prop+".default";
-            this.set(tmp, this._i18n[prop][this.language]);
-          }
-        },
-
-        //////////////////////
-        // PROCES FUNCTIONS //
-        //////////////////////
-
-
-        /**
-        * Triggered when the value of `typeSelect` changes.
-        * Set `columnForType` and calls `updateSample`.
-        *
-        * @method _typeSelectChanged
-        */
-        _typeSelectChanged: function(){
-          var index = this.$.typeSelect.selectedIndex ;
-          if(index === -1)
-            index = 0;
-          this.selectedColumn4Type = this.csvSchema.columns[ parseInt( this.$.typeSelect.options[index].value ) ];
-          this.columnForType = parseInt( this.$.typeSelect.options[index].value );
-          this._updateSample();
-        },
-
-        /**
-        * Bound function to input `checked` status.
-        * Return `item`.enabled
-        *
-        * @method _isTypeEnabled
-        */
-        _isTypeEnabled: function(item){
-          return item.enabled;
-        },
-
-        /**
-        * Enable/Disable a specific attribute from all the types.
-        *
-        * @method _changeAllAttributeStatus
-        */
-        _changeAllAttributeStatus: function(e){
-          for(var i = 0; i < this._typesObjects.length; i++){
-            this.set('_typesObjects.'+i+'.attributes.'+e.model.index+'.enabled', e.target.checked);
-          }
-        },
-
-        /**
-        * Triggered when the user clicks on the submit button.
-        * Fires the `MODEL_SET` event.
-        *
-        * @method _changeAllAttributeStatus
-        */
-        _submit: function(){
-          this.fire('MODEL_SET', {typesObjects:this._typesObjects, typeColumn: this.columnForType});
-        },
-
-
-        _typeEnabledClicked: function(e){
-          e.model.item.enabled = e.target.checked;
-        },
-
-        ///////////////////////
-        // PARSING FUNCTIONS //
-        ///////////////////////
-
-        /**
-        * Get the selected column values from a few lines of the trace file.
-        *
-        * @method _getSample
-        */
-        _getSample: function(){
-
-          // Create a pointer to `this` for later.
-          var that = this;
-
-          // Create a callback object for the file reader.
-          var callback = {
-            onload: function(evt){
-
-              //parse the lines from the trace file and go to _updateSample
-              var worker = new Worker(that.resolveUrl('csvToArray.js'));
-              worker.addEventListener('message', function(e) {
-                  var parsedSample = e.data;
-                  that.parsedSample = parsedSample;
-                  that._updateSample();
-                }, false);
-              worker.postMessage({strData: evt.target.result, strDelimiter: that.csvSchema.separator});
-            },
-            onerror: function(evt){
-              console.log('error');
-              console.log(evt);
-            },
-            onprogress: function(evt){ }
+          // Set the index of the selected column as type.
+          else {
+            this.set('columnForType', parseInt(this.$.typeSelect.options[this.$.typeSelect.selectedIndex].value));
           }
 
-          //Get a few lines form the trace file.
-          that.fileReader.getSample(0, callback);
-        },
+          // Push the samples in selectedColumnSample.
+          for (var i = 1; i < this.parsedSample.length - 1; i++) {
+            this.push('selectedColumnSample', this.parsedSample[i][this.columnForType]);
+          }
+        }
+      },
 
+      /**
+       * Triggered when "use this column" button is clicked.
+       *
+       * @method _useType
+       */
+      _useType: function() {
 
+        this.set('types', []);
 
-        /**
-        * Update the sample lines to display.
-        *
-        * @method _updateSample
-        */
-        _updateSample: function(){
+        this.set('_fileIndex', -1);
+        this.set('_sliceIndex', 1);
 
-          // if the parsedSample as correctly been set.
-          if(this.parsedSample !== undefined){
+        this._getTypesFromFile();
 
-            // Reset selectedColumnSample
-            this.set('selectedColumnSample', []);
+        this.$.typesEditorPane.style.opacity = 1;
+        this.$.samplePane.style.height = 0;
+      },
 
-            console.log( this.csvSchema );
+      /**
+       * Init the type from each files.
+       *
+       * @method _getTypesFromFile
+       *
+       * @parameter {!required} a An event fired from polymer.fire.
+       * Must contain the object `detail.fileIndex`, with fileIndex the index of the file
+       * in `files`.
+       */
+      _getTypesFromFile: function() {
 
-            if( this.csvSchema.typeColumn && this.csvSchema.typeColumn !== -1){
-              this.set('columnForType', this.csvSchema.typeColumn);
-              if( this.csvSchema.typesObjects ){
+        if (this._fileIndex < this.fileReader.files.length - 1) {
+          this.set('_fileIndex', this._fileIndex + 1);
+          this._getAllTypes();
+        } else {
+          this._obselsChanged();
+        }
+      },
 
-                this.$.typeSelect.options[0].selected = false;
-                this.$.typeSelect.options[this.csvSchema.typeColumn].selected = true;
+      /**
+       * Get all the different values of the type column from one file.
+       *
+       * @method _getAllTypes
+       *
+       * @parameter {!required} a An event fired from polymer.fire.
+       * Must contain the object `detail.fileIndex`, with fileIndex the index of the file
+       * in `files`.
+       */
+      _getAllTypes: function() {
 
-                this.set('_typesObjects', this.csvSchema.typesObjects);
+        this.set('_slicesCount', this.fileReader.getSlices(this._fileIndex));
 
-                this.$.typesEditorPane.style.opacity = 1;
-                this.$.samplePane.style.height = 0;
+        var that = this;
+
+        var callback = {
+          onload: function(evt) {
+            that._parseFile(evt.target.result);
+          },
+          onerror: function(evt) {},
+          onprogress: function(evt) {}
+        }
+
+        this.fileReader.getSlice(this._fileIndex, 1, callback);
+
+      },
+
+      _parseFile: function(data) {
+        var worker = new Worker(this.resolveUrl('csvToArray.js'));
+
+        var that = this;
+
+        var callback = {
+          onload: function(evt) {
+            that._parseFile(evt.target.result);
+          },
+          onerror: function(evt) {},
+          onprogress: function(evt) {}
+        }
+
+        var sData = that._remains + data;
+
+        worker.addEventListener('message', function(e) {
+
+          // Set the remains for next slice.
+          that.set('_remains', "");
+
+          var lastString = '"' + e.data[e.data.length - 1][0] + '"';
+          for (var i = 1; i < e.data[e.data.length - 1].length; i++) {
+            if (e.data[e.data.length - 1][i] !== "")
+              lastString += ',"' + e.data[e.data.length - 1][i].replace(/"/g, '""') + '"';
+          }
+
+          sDataEnding = "";
+
+          var index = sData.indexOf(lastString);
+
+          if (index !== -1) {
+            for (var i = index; i < sData.length; i++) {
+              sDataEnding += sData[i];
+            }
+          }
+
+          that._remains = sDataEnding;
+
+          for (var i = 0; i < e.data.length - 1; i++) {
+            if (that.csvSchema.columnHeader && that._sliceIndex === 1 && i === 0) {
+              // Let's just ignore the first line.
+            } else {
+              var typeExists = false;
+              for (var j = 0; j < that.types.length; j++) {
+                if (that.types[j] === e.data[i][that.columnForType]) {
+                  typeExists = true;
+                }
               }
-            }
-            // Set the index of the selected column as type.
-            else{
-              this.set('columnForType', parseInt( this.$.typeSelect.options[this.$.typeSelect.selectedIndex].value ) );
-            }
-
-            // Push the samples in selectedColumnSample.
-            for(var i = 1; i < this.parsedSample.length - 1; i++){
-              this.push('selectedColumnSample', this.parsedSample[i][this.columnForType]);
-            }
-          }
-        },
-
-        /**
-        * Triggered when "use this column" button is clicked.
-        *
-        * @method _useType
-        */
-        _useType: function(){
-
-          this.set('types', []);
-
-          this.set('_fileIndex', -1);
-
-          this._getTypesFromFile();
-
-          this.$.typesEditorPane.style.opacity = 1;
-          this.$.samplePane.style.height = 0;
-        },
-
-        /**
-        * Init the type from each files.
-        *
-        * @method _getTypesFromFile
-        *
-        * @parameter {!required} a An event fired from polymer.fire.
-        * Must contain the object `detail.fileIndex`, with fileIndex the index of the file
-        * in `files`.
-        */
-        _getTypesFromFile: function( ){
-
-          if(this._fileIndex < this.fileReader.files.length - 1){
-            this.set('_fileIndex', this._fileIndex + 1);
-            this._getAllTypes();
-          }
-          else{
-              this._obselsChanged();
-          }
-        },
-
-        /**
-        * Get all the different values of the type column from one file.
-        *
-        * @method _getAllTypes
-        *
-        * @parameter {!required} a An event fired from polymer.fire.
-        * Must contain the object `detail.fileIndex`, with fileIndex the index of the file
-        * in `files`.
-        */
-        _getAllTypes: function(){
-
-            this.set('_slicesCount', this.fileReader.getSlices(this._fileIndex) );
-
-            var that = this;
-
-            var callback = {
-              onload: function(evt){
-                that._parseFile( evt.target.result );
-              },
-              onerror: function(evt){ },
-              onprogress: function(evt){ }
-            }
-
-            this.fileReader.getSlice(this._fileIndex, 1, callback);
-
-        },
-
-        _parseFile: function(data){
-          var worker = new Worker(this.resolveUrl('csvToArray.js'));
-
-          var that = this;
-
-          var callback = {
-            onload: function(evt){
-              that._parseFile( evt.target.result );
-            },
-            onerror: function(evt){ },
-            onprogress: function(evt){ }
-          }
-
-          worker.addEventListener('message', function(e) {
-
-            // Set the remains for next slice.
-            that.set('_remains', "");
-            for(var i = 0 ; i < e.data[e.data.length-1].length-1 ;i++){
-              that._remains = that._remains+e.data[e.data.length-1][i] + that.csvSchema.separator;
-            }
-            that._remains = that._remains+e.data[e.data.length-1][e.data[e.data.length-1].length-1];
-
-
-            for(var i = 0; i < e.data.length - 1; i++){
-              if( that.csvSchema.columnHeader && that._sliceIndex === 1 && i === 0 ){
-                // Let's just ignore the first line.
-              }
-              else{
-                var typeExists = false;
-                for(var j=0; j< that.types.length; j++){
-                  if( that.types[j] === e.data[i][that.columnForType] ){
-                    typeExists = true;
+              if (!typeExists) {
+                if (that.types.length > 100 && !that._continueParsing) {
+                  if (window.confirm("There currently are more than 100 types. It seems the chosen column is inappropriate. Do you want to stop parsing?")) {
+                    i = e.data.length;
+                    that._sliceIndex = that._sliceCount + 1;
+                    that._fileIndex = that.fileReader.files.length;
                   }
-                }
-                if(!typeExists){
-                  that.push('types', e.data[i][that.columnForType] );
+                  else{
+                    that.set('_continueParsing', true);
+                    that.push('types', e.data[i][that.columnForType]);
+                  }
+                } else {
+                  that.push('types', e.data[i][that.columnForType]);
                 }
               }
             }
-            that._sliceIndex = that._sliceIndex + 1;
-            if(that._sliceIndex <= that._slicesCount){
-              worker.terminate();
-              that.fileReader.getSlice(that._fileIndex, that._sliceIndex, callback);
-            }
-            else{
-              worker.terminate();
-              that._getTypesFromFile();
-            }
-          }, false);
+          }
+          that._sliceIndex = that._sliceIndex + 1;
+          if (that._sliceIndex <= that._slicesCount) {
+            worker.terminate();
+            that.fileReader.getSlice(that._fileIndex, that._sliceIndex, callback);
+          } else {
+            worker.terminate();
+            that._getTypesFromFile();
+          }
+        }, false);
 
-          var sData =  that._remains + data;
-          worker.postMessage({strData: sData, strDelimiter: that.csvSchema.separator});
-        },
+        worker.postMessage({
+          strData: sData,
+          strDelimiter: that.csvSchema.separator
+        });
+      },
 
-        _obselsChanged: function(){
+      _obselsChanged: function() {
 
-          for(var i = 0; i < this.types.length; i++){
+        this.set('_typesObjects', []);
 
-            var attributes = [];
-            for( var j = 0 ; j < this.csvSchema.columns.length ; j++ ){
-              attributes.push({
-                name: this.csvSchema.columns[j].name,
-                datatype: this.csvSchema.columns[j].dataType,
-                enabled: true
-              })
-            }
+        for (var i = 0; i < this.types.length; i++) {
 
-            this.push('_typesObjects', {
-              title: this.types[i],
-              name: this.types[i],
-              enabled: true,
-              attributes: attributes
+          var attributes = [];
+          for (var j = 0; j < this.csvSchema.columns.length; j++) {
+            attributes.push({
+              name: this.csvSchema.columns[j].name,
+              datatype: this.csvSchema.columns[j].dataType,
+              enabled: true
             })
           }
 
+          this.push('_typesObjects', {
+            title: this.types[i],
+            name: this.types[i],
+            enabled: true,
+            attributes: attributes
+          })
         }
 
-      });
-    </script>
+      }
 
-  </dom-module>
+    });
+  </script>
+
+</dom-module>
