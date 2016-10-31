@@ -7,7 +7,7 @@
     <style>
       :host {
         width: 100%;
-        display: block
+        display: block;
       }
 
       :host #container {
@@ -15,8 +15,8 @@
         margin: 0 auto;
       }
 
-      :host .attributesRow:nth-child(2n + 1),
-      .typesRow:nth-child(2n + 1) {
+      :host .attributesRow:nth-child(2n+ 1),
+      .typesRow:nth-child(2n+ 1) {
         background-color: rgba(144, 144, 144, 0.25);
       }
 
@@ -38,39 +38,38 @@
         -o-transition: opacity 0.25s ease-in-out;
         -ms-transition: opacity 0.25s ease-in-out;
       }
-
-      :host #samplePane {
-        -webkit-transition: height 0.25s ease-in-out;
-        -moz-transition: height 0.25s ease-in-out;
-        -o-transition: height 0.25s ease-in-out;
-        -ms-transition: height 0.25s ease-in-out;
-      }
     </style>
 
     <div id="container">
-      <iron-icon icon="icons:check" class="editIcons fgGreen fgGreenH" on-click="_submit"></iron-icon>
+      <iron-icon icon="icons:forward" class="editIcons fgGreen fgGreenH" on-click="_submit"></iron-icon>
       <h4> Edit your kTBS model ( <span class="subTitle">{{csvSchema.id}}</span> )</h4>
 
-      <h5> Obsels type column </h5>
-      <select id="typeSelect" style="width:100%; height:20pt" on-change="_typeSelectChanged">
-        <template is="dom-repeat" items="{{csvSchema.columns}}">
-          <option value="{{index}}">
-            <span>{{item.name}}</span>
+      <section>
+        <h5> Obsels type column <iron-icon icon="icons:visibility" on-click="_onToggleSamplePanelClick"></iron-icon> </h5>
+        <select id="typeSelect" style="width:100%; height:20pt" on-change="_typeSelectChanged">
+          <option value="-1">
+            <span>Create-a-generic-type</span>
           </option>
-        </template>
-      </select>
-
-      <div id="samplePane" style="display:block;height:200px;width:100%;overflow-y:auto;padding:20px;">
-        <table>
-          <template is="dom-repeat" items="{{selectedColumnSample}}">
-            <tr>
-              <td> <span>{{item}}</span> </td>
-            </tr>
+          <template is="dom-repeat" items="{{csvSchema.columns}}">
+            <option value="{{index}}">
+              <span>{{item.name}}</span>
+            </option>
           </template>
-        </table>
-      </div>
+        </select>
 
-      <div on-click="_useType" class="button">Use this column</div>
+        <iron-collapse id="samplePane">
+          <div  class="swag-scroll" style="display:block;height:200px;width:100%;overflow-y:auto;padding:20px;">
+            <table>
+              <template is="dom-repeat" items="{{selectedColumnSample}}">
+                <tr>
+                  <td> <span>{{item}}</span> </td>
+                </tr>
+              </template>
+            </table>
+          </div>
+        </iron-collapse>
+
+        <div on-click="_useType" class="button">Use this column</div>
     </div>
 
     <br/>
@@ -83,7 +82,7 @@
         </div>
       </div>
 
-      <div id="attributesTitle" style="display: block;width: 90%; float:left; overflow-x: auto; margin-left: -200px;">
+      <div id="attributesTitle" class="swag-scroll" style="display: block;width: 90%; float:left; overflow-x: auto; margin-left: -200px;">
 
         <div style="position: relative; display:table; width: 100%; table-layout: fixed; ">
           <div style="display:table-cell; width: 200px">
@@ -97,7 +96,7 @@
         </div>
       </div>
 
-      <div id="typesPanel" class="bgWhite" style="border-right: solid 1px #2E3842; position:relative;display: block; float:left; width: 200px; overflow-y: hidden; max-height: 700px; margin-left: 5%; z-index:200">
+      <div id="typesPanel" class="bgWhite" style="border-right: solid 1px #2E3842; position:relative;display: block; float:left; width: 200px; overflow-y: hidden; max-height: 500px; margin-left: 5%; z-index:200">
         <template is="dom-repeat" items="{{_typesObjects}}">
           <div class="typesRow" style="display:block; width: 100%; height: 166px; border-bottom: solid 1px grey;">
             <input class="inputWithIcon" value="{{item.name::input}}">
@@ -109,7 +108,7 @@
         </template>
       </div>
 
-      <div id="attributesPanel" style="position:relative;display: block; float:left;width: 90%; overflow-x:hidden; overflow-y:scroll; max-height: 700px; margin-left: -200px;; z-index:1">
+      <div id="attributesPanel" class="swag-scroll" style="position:relative;display: block; float:left;width: 90%; overflow-x:hidden; overflow-y:scroll; max-height: 500px; margin-left: -200px;; z-index:1">
         <div style="position: relative; display:table; width: 100%; table-layout: fixed; ">
           <template is="dom-repeat" items="{{_typesObjects}}">
             <div class="attributesRow" style="display:table-row;">
@@ -123,6 +122,8 @@
           </template>
         </div>
       </div>
+
+
     </div>
   </template>
   <script>
@@ -204,6 +205,12 @@
           value: false
         },
 
+        columnForType: {
+          type: Number,
+          notify: true,
+          value: -1
+        },
+
         /**
          * Localization.
          * fr, en.
@@ -235,11 +242,10 @@
 
       },
 
-      attached: function(){
+      attached: function() {
         // Load i18n json.
         this.loadResources(this.resolveUrl('./locales.json'));
       },
-
 
       //////////////////////
       // PROCES FUNCTIONS //
@@ -253,11 +259,11 @@
        */
       _typeSelectChanged: function() {
         var index = this.$.typeSelect.selectedIndex;
-        if (index === -1)
-          index = 0;
-        this.selectedColumn4Type = this.csvSchema.columns[parseInt(this.$.typeSelect.options[index].value)];
-        this.columnForType = parseInt(this.$.typeSelect.options[index].value);
-        this._updateSample();
+        if (index !== -1) {
+          this.selectedColumn4Type = this.csvSchema.columns[parseInt(this.$.typeSelect.options[index].value)];
+          this.columnForType = parseInt(this.$.typeSelect.options[index].value);
+          this._updateSample();
+        }
       },
 
       /**
@@ -309,25 +315,22 @@
        */
       _getSample: function() {
 
-        // Create a pointer to `this` for later.
-        var that = this;
-
         // Create a callback object for the file reader.
         var callback = {
           onload: function(evt) {
 
             //parse the lines from the trace file and go to _updateSample
-            var worker = new Worker(that.resolveUrl('csvToArray.js'));
+            var worker = new Worker(this.resolveUrl('csvToArray.js'));
             worker.addEventListener('message', function(e) {
               var parsedSample = e.data;
-              that.parsedSample = parsedSample;
-              that._updateSample();
-            }, false);
+              this.parsedSample = parsedSample;
+              this._updateSample();
+            }.bind(this), false);
             worker.postMessage({
               strData: evt.target.result,
-              strDelimiter: that.csvSchema.separator
+              strDelimiter: this.csvSchema.separator
             });
-          },
+          }.bind(this),
           onerror: function(evt) {
             console.log('error');
             console.log(evt);
@@ -336,7 +339,7 @@
         }
 
         //Get a few lines form the trace file.
-        that.fileReader.getSample(0, callback);
+        this.fileReader.getSample(0, callback);
       },
 
       /**
@@ -352,8 +355,6 @@
           // Reset selectedColumnSample
           this.set('selectedColumnSample', []);
 
-          console.log(this.csvSchema);
-
           if (this.csvSchema.typeColumn && this.csvSchema.typeColumn !== -1) {
             this.set('columnForType', this.csvSchema.typeColumn);
             if (this.csvSchema.typesObjects) {
@@ -364,7 +365,6 @@
               this.set('_typesObjects', this.csvSchema.typesObjects);
 
               this.$.typesEditorPane.style.opacity = 1;
-              this.$.samplePane.style.height = 0;
             }
           }
           // Set the index of the selected column as type.
@@ -386,15 +386,38 @@
        */
       _useType: function() {
 
-        this.set('types', []);
+        console.log(this.columnForType);
 
-        this.set('_fileIndex', -1);
-        this.set('_sliceIndex', 1);
+        if (this.columnForType !== -1) {
+          this.set('types', []);
 
-        this._getTypesFromFile();
+          this.set('_fileIndex', -1);
+          this.set('_sliceIndex', 1);
+
+          this._getTypesFromFile();
+
+        } else {
+          this.set('_typesObjects', []);
+
+          var attributes = [];
+          for (var j = 0; j < this.csvSchema.columns.length; j++) {
+            attributes.push({
+              name: this.csvSchema.columns[j].name,
+              datatype: this.csvSchema.columns[j].dataType,
+              enabled: true
+            })
+          }
+
+          this.push('_typesObjects', {
+            title: null,
+            name: 'default_type',
+            enabled: true,
+            attributes: attributes
+          })
+        }
 
         this.$.typesEditorPane.style.opacity = 1;
-        this.$.samplePane.style.height = 0;
+
       },
 
       /**
@@ -456,30 +479,51 @@
           onprogress: function(evt) {}
         }
 
-        var sData = that._remains + data;
+        var sData = data;
 
         worker.addEventListener('message', function(e) {
 
-          // Set the remains for next slice.
-          that.set('_remains', "");
+          var parsed = e.data;
 
-          var lastString = '"' + e.data[e.data.length - 1][0] + '"';
-          for (var i = 1; i < e.data[e.data.length - 1].length; i++) {
-            if (e.data[e.data.length - 1][i] !== "")
-              lastString += ',"' + e.data[e.data.length - 1][i].replace(/"/g, '""') + '"';
-          }
+          if (that._remains.length > 0) {
 
-          sDataEnding = "";
+            if (that._remains.length < that.csvSchema.columns.length || parsed[0].length < that.csvSchema.columns.length) {
+              // If a cell has been cut in half (most of the cases)
+              if (that._remains.length + parsed[0].length > that.csvSchema.columns.length) {
+                var line = [];
+                for (var i = 0; i < that._remains.length; i++) {
+                  line.push(that._remains[i]);
+                }
+                line[line.length - 1] += parsed[0][0];
+                for (var i = 1; i < parsed[0].length; i++) {
+                  line.push(parsed[0][i]);
+                }
+                parsed.splice(0, 1, line);
+              } else {
+                var line = [];
+                for (var i = 0; i < that._remains.length; i++) {
+                  line.push(that._remains[i]);
+                }
+                for (var i = 0; i < parsed[0].length; i++) {
+                  line.push(parsed[0][i]);
+                }
+                parsed.splice(0, 1, line);
+              }
 
-          var index = sData.indexOf(lastString);
-
-          if (index !== -1) {
-            for (var i = index; i < sData.length; i++) {
-              sDataEnding += sData[i];
+            } else {
+              parsed.splice(0, 0, line);
             }
+
           }
 
-          that._remains = sDataEnding;
+          // Set the remains for next slice.
+          if (that._sliceIndex !== that._slicesCount) {
+            that.set('_remains', parsed[parsed.length - 1]);
+            parsed.splice(parsed.length - 1, 1);
+          }
+
+          console.log(parsed);
+          console.log(that._remains);
 
           for (var i = 0; i < e.data.length - 1; i++) {
             if (that.csvSchema.columnHeader && that._sliceIndex === 1 && i === 0) {
@@ -497,8 +541,7 @@
                     i = e.data.length;
                     that._sliceIndex = that._sliceCount + 1;
                     that._fileIndex = that.fileReader.files.length;
-                  }
-                  else{
+                  } else {
                     that.set('_continueParsing', true);
                     that.push('types', e.data[i][that.columnForType]);
                   }
@@ -547,6 +590,10 @@
           })
         }
 
+      },
+
+      _onToggleSamplePanelClick: function(){
+        this.$.samplePane.toggle();
       }
 
     });
