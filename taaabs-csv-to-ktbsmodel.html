@@ -6,176 +6,170 @@
   <template>
     <style include="taaabs-dark-theme"></style>
     <style>
-
-      :host{
+      :host {
         width: 100%;
         display: block;
+        height: 100%;
+        @apply(--layout-vertical);
       }
-
     </style>
 
     <div style="width: 1000px; margin: 0 auto;">
       <taaabs-csv-collector-steps id="tccs" steps=[[_steps]]></taaabs-csv-collector-steps>
     </div>
 
-    <iron-pages selected="{{_pageIndex}}" style="margin-top: 30px;">
+    <div>
+      <iron-pages selected="{{_pageIndex}}" style="margin-top: 30px;">
 
-      <div style="max-width: 1000px; margin: 0 auto">
-        <taaabs-csv-collector-files id="tccf" files="{{files}}" file-reader={{_filereader}} language="{{language}}"></taaabs-csv-collector-files>
-      </div>
+        <div style="max-width: 1000px; margin: 0 auto">
+          <taaabs-csv-collector-files id="tccf" files="{{files}}" file-reader={{_filereader}} language="{{language}}"></taaabs-csv-collector-files>
+        </div>
 
-      <div  style="max-width: 1000px; margin: 0 auto">
-        <taaabs-csv-collector-configs id="tccc" csv-schemas="[[csvSchemas]]">
-        </taaabs-csv-collector-configs>
-      </div>
-
-
-      <div  style="width: 100vw; left:0; position: absolute">
-        <taaabs-ctkm-model-edit id="tcme" csv-schema="{{csvSchema}}" file-reader="[[_filereader]]" language="{{language}}">
-        </taaabs-ctkm-model-edit>
-      </div>
-
-      <div>
-        <taaabs-ctkm-date id="tcd" csv-schema="[[csvSchema]]" file-reader="[[_filereader]]">
-        </taaabs-ctkm-date>
-      </div>
-
-      <div>
-        <taaabs-ctkm-model-preview id="tcmp" csv-schemas="[[csvSchemas]]" csv-schema="[[csvSchema]]" base="[[base]]" language="{{language}}">
-        </taaabs-ctkm-model-preview>
-      </div>
+        <div style="max-width: 1000px; margin: 0 auto">
+          <taaabs-csv-collector-configs id="tccc" csv-schemas="[[csvSchemas]]">
+          </taaabs-csv-collector-configs>
+        </div>
 
 
-      <div style="max-width: 1000px; margin: 0 auto">
-        <taaabs-csv-collector-finalize id="tccfi" csv-schema-id="[[csvSchema.id]]" language="{{language}}"></taaabs-csv-collector-finalize>
-      </div>
+        <div style="width: 100vw; left:0; position: absolute; max-height: 100%;">
+          <taaabs-ctkm-model-edit id="tcme" csv-schema="{{csvSchema}}" file-reader="[[_filereader]]" language="{{language}}">
+          </taaabs-ctkm-model-edit>
+        </div>
 
-    </iron-pages>
+        <div>
+          <taaabs-ctkm-date id="tcd" csv-schema="[[csvSchema]]" file-reader="[[_filereader]]">
+          </taaabs-ctkm-date>
+        </div>
+
+        <div>
+          <taaabs-ctkm-model-preview id="tcmp" csv-schemas="[[csvSchemas]]" csv-schema="[[csvSchema]]" base="[[base]]" language="{{language}}">
+          </taaabs-ctkm-model-preview>
+        </div>
+
+
+        <div style="max-width: 1000px; margin: 0 auto">
+          <taaabs-csv-collector-finalize id="tccfi" csv-schema-id="[[csvSchema.id]]" language="{{language}}"></taaabs-csv-collector-finalize>
+        </div>
+
+      </iron-pages>
+    </div>
   </template>
 
   <script>
-
     /**
-    * `taaabs-csv-to-ktbsmodel` is graphical element in which the user can edit the corresponding trace model of a trace csv file.
-    *
-    * ### Example :
-    *
-    *      <taaabs-csv-to-ktbsmodel id="csvToKtbsModel"
-    *         csv-schemas="{{csvSchemas}}"
-    *         base="[[_base]]"
-    *         files="{{files}}"
-    *         csv-schema="{{csvSchema}}"
-    *         language="{{language}}">
-    *      </taaabs-csv-to-ktbsmodel>
-    *
-    *
-    * @element taaabs-csv-to-ktbsmodel
-    */
+     * `taaabs-csv-to-ktbsmodel` is graphical element in which the user can edit the corresponding trace model of a trace csv file.
+     *
+     * ### Example :
+     *
+     *      <taaabs-csv-to-ktbsmodel id="csvToKtbsModel"
+     *         csv-schemas="{{csvSchemas}}"
+     *         base="[[_base]]"
+     *         files="{{files}}"
+     *         csv-schema="{{csvSchema}}"
+     *         language="{{language}}">
+     *      </taaabs-csv-to-ktbsmodel>
+     *
+     *
+     * @element taaabs-csv-to-ktbsmodel
+     */
     Polymer({
       is: 'taaabs-csv-to-ktbsmodel',
 
       properties: {
 
         /**
-        * Array of step for the `taaabs-csv-collector-steps`.
-        *
-        * @attribute _steps
-        * @type Array
-        */
+         * Array of step for the `taaabs-csv-collector-steps`.
+         *
+         * @attribute _steps
+         * @type Array
+         */
         _steps: {
           type: Array,
-          value: [
-            {
-                'name':'file selection',
-                'state':'current'
-            },
-            {
-                'name':'import-config initialisation',
-                'state':'undone'
-            },
-            {
-                'name':'ktbs model',
-                'state':'undone'
-            },
-            {
-                'name':'date format',
-                'state':'undone'
-            },
-            {
-                'name':'model creation',
-                'state':'undone'
-            },
-            {
-                'name':'finalize',
-                'state':'undone'
-            }
-          ]
+          value: [{
+            'name': 'file selection',
+            'state': 'current'
+          }, {
+            'name': 'import-config initialisation',
+            'state': 'undone'
+          }, {
+            'name': 'ktbs model',
+            'state': 'undone'
+          }, {
+            'name': 'date format',
+            'state': 'undone'
+          }, {
+            'name': 'model creation',
+            'state': 'undone'
+          }, {
+            'name': 'finalize',
+            'state': 'undone'
+          }]
         },
 
         /**
-        * Traces files opened by the user.
-        *
-        * @attribute files
-        * @type Array
-        */
+         * Traces files opened by the user.
+         *
+         * @attribute files
+         * @type Array
+         */
         files: {
           type: Array,
           notify: true,
-          value: function(){
+          value: function() {
             return [];
           },
         },
 
         /**
-        * Current csv schema used/edited by the user.
-        *
-        * @attribute csvSchema
-        * @type Object
-        */
+         * Current csv schema used/edited by the user.
+         *
+         * @attribute csvSchema
+         * @type Object
+         */
         csvSchema: {
           type: Object,
           notify: true,
-          value: function(){
+          value: function() {
             return {};
           }
         },
 
         /**
-        * Array of all existing csv schemas on the current base.
-        *
-        * @attribute csvSchemas
-        * @type Array
-        */
+         * Array of all existing csv schemas on the current base.
+         *
+         * @attribute csvSchemas
+         * @type Array
+         */
         csvSchemas: {
           type: Array,
           notify: true,
-          value: function(){
+          value: function() {
             return [];
           }
         },
 
         /**
-        * Current base edited by the user.
-        *
-        * @attribute base
-        * @type Object
-        *
-        * @see Samotraces
-        */
+         * Current base edited by the user.
+         *
+         * @attribute base
+         * @type Object
+         *
+         * @see Samotraces
+         */
         base: {
           type: Object,
           notify: true,
-          value: function(){
+          value: function() {
             return {};
           }
         },
 
         /**
-        * Index of the current page section of the iron-pages.
-        *
-        * @attribute _pageIndex
-        * @type Number
-        */
+         * Index of the current page section of the iron-pages.
+         *
+         * @attribute _pageIndex
+         * @type Number
+         */
         _pageIndex: {
           type: Number,
           notify: true,
@@ -183,65 +177,65 @@
         },
 
         /**
-        * Localization object.
-        *
-        * @attribute _i18n
-        * @type Object
-        */
+         * Localization object.
+         *
+         * @attribute _i18n
+         * @type Object
+         */
         _i18n: {
-            type: Object,
-            value: function(){
-              return {}
-            },
-            notify: true
+          type: Object,
+          value: function() {
+            return {}
+          },
+          notify: true
         },
 
         /**
-        * Localization.
-        * fr, en.
-        *
-        * @attribute language
-        * @type String
-        */
+         * Localization.
+         * fr, en.
+         *
+         * @attribute language
+         * @type String
+         */
         language: {
-            type: String,
-            notify: true,
+          type: String,
+          notify: true,
         }
 
       },
 
-      ready: function(){
+      ready: function() {
 
         // Create a pointer to `this` for later.
         var that = this;
 
         // When the user chooses a step.
-        this.$.tccs.addEventListener('STEP_CLICKED', function(e){
+        this.$.tccs.addEventListener('STEP_CLICKED', function(e) {
           that._goToPage(e.detail.index);
         })
 
         // When the user chooses a file.
-        this.$.tccf.addEventListener('FILES_SELECTED', function(){
+        this.$.tccf.addEventListener('FILES_SELECTED', function() {
           that._goToPage(1);
         });
 
         // When the user chooses to create a new schema.
-        this.$.tccc.addEventListener('CREATE_SCHEMA', function(e){
+        this.$.tccc.addEventListener('CREATE_SCHEMA', function(e) {
           alert('You cannot create at the point of the upload process. ');
         })
 
         // When the user chooses to edit an existing schema.
-        this.$.tccc.addEventListener('SELECT_SCHEMA', function(e){
+        this.$.tccc.addEventListener('SELECT_SCHEMA', function(e) {
           that.set('csvSchema', that.csvSchemas[e.detail.index]);
           that._goToPage(2);
           that.$.tcme._getSample();
         })
 
         // When the user finished a model edition.
-        this.$.tcme.addEventListener('MODEL_SET', function(e){
+        this.$.tcme.addEventListener('MODEL_SET', function(e) {
           that._goToPage(3);
 
-          console.log( that.csvSchema );
+          console.log(that.csvSchema);
           console.log(e.detail);
 
           that.csvSchema.typesObjects = e.detail.typesObjects;
@@ -250,52 +244,56 @@
         })
 
         // When the user finished the obsel temporality edition.
-        this.$.tcd.addEventListener('TIME_SET', function(e){
+        this.$.tcd.addEventListener('TIME_SET', function(e) {
           that.csvSchema.time = e.detail.time;
           that._goToPage(4);
         })
 
         // When the trace model has been created.
-        this.$.tcmp.addEventListener('MODEL_CREATED', function(){
+        this.$.tcmp.addEventListener('MODEL_CREATED', function() {
           that._goToPage(5);
         })
 
         // When the user chooses to continue the upload process.
-        this.$.tccfi.addEventListener('SAVE_NEXT', function(){
+        this.$.tccfi.addEventListener('SAVE_NEXT', function() {
           that._saveAndNextStep();
         })
       },
 
       /**
-      * Upload `csvSchema` to the `base` and call `nextStepFunction`.
-      *
-      * @method _saveAndNextStep
-      * @see `nextStepFunction`
-      */
-      _saveAndNextStep: function(){
-        that.fire('SAVE_NEXT');
+       * Upload `csvSchema` to the `base` and call `nextStepFunction`.
+       *
+       * @method _saveAndNextStep
+       * @see `nextStepFunction`
+       */
+      _saveAndNextStep: function() {
+        this.fire('SAVE_NEXT');
       },
 
       //////////////////////////
       // NAVIGATION FUNCTIONS //
       //////////////////////////
 
-      _goToPage: function( index ){
+      _goToPage: function(index) {
 
-        this.set('_pageIndex',index);
+        this.set('_pageIndex', index);
 
-        for(var i = 0; i < this._steps.length; i++){
-          if( i < index ){
-            this.splice('_steps',i,1,{'name':this._steps[i].name,
-            'state':'done'});
-          }
-          else if( i > index ){
-            this.splice('_steps',i,1,{'name':this._steps[i].name,
-            'state':'undone'});
-          }
-          else{
-            this.splice('_steps',i,1,{'name':this._steps[i].name,
-            'state':'current'});
+        for (var i = 0; i < this._steps.length; i++) {
+          if (i < index) {
+            this.splice('_steps', i, 1, {
+              'name': this._steps[i].name,
+              'state': 'done'
+            });
+          } else if (i > index) {
+            this.splice('_steps', i, 1, {
+              'name': this._steps[i].name,
+              'state': 'undone'
+            });
+          } else {
+            this.splice('_steps', i, 1, {
+              'name': this._steps[i].name,
+              'state': 'current'
+            });
           }
         }
       },
@@ -305,14 +303,14 @@
       ///////////
 
       /**
-      * Triggered when the language option is changed.
-      * Switches every text into the new language.
-      *
-      * @method _languageChanged
-      */
-      _languageChanged: function(){
-        for(var prop in this._i18n) {
-          var tmp = "_i18n."+prop+".default";
+       * Triggered when the language option is changed.
+       * Switches every text into the new language.
+       *
+       * @method _languageChanged
+       */
+      _languageChanged: function() {
+        for (var prop in this._i18n) {
+          var tmp = "_i18n." + prop + ".default";
           this.set(tmp, this._i18n[prop][this.language]);
         }
       }
