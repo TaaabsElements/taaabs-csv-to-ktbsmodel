@@ -1,26 +1,31 @@
-<link rel="import" href="../taaabs-themes/taaabs-dark-theme.html">
+<link rel="import" href="../taaabs-themes/taaabs-theme.html">
+<link rel="import" href="../../bower_components/notify-toast-behavior/notify-toast-behavior.html">
 <dom-module id="taaabs-ctkm-sticker">
 
 
 	<template>
 
-		<style include="taaabs-dark-theme"></style>
+		<style include="taaabs-theme"></style>
     <style>
 
+		:host {
+			display: block;
+			background: transparent;
+			padding: 0px;
+			box-sizing: border-box;
+		}
+
     :host #container {
-      margin: 10px;
-      display: table;
       height: 100px;
+			padding: 5px;
     }
 
     /* LEFT PANEL */
     :host #leftPanel {
       display: table-cell;
       width: 250px;
-    }
-
-    :host #leftPanel > div {
-      padding: 15px;
+			padding: 5px;
+			height: 100px;
     }
 
     :host select {
@@ -32,7 +37,6 @@
 
     :host #rightPanel > div {
       display: block;
-      position: absolute;
       font-size: 12px;
       letter-spacing: normal;
       line-height: normal;
@@ -40,8 +44,8 @@
       margin: 0;
       padding: 0;
       height: 26px;
-      width: 100px;
-      margin-left: -34px;
+      width: 110px;
+      margin-left: -38px;
       margin-top: 45px;
       -webkit-transform: rotate(-90deg);
       transform: rotate(-90deg);
@@ -76,12 +80,10 @@
 
     </style>
 
-  	<div id="container">
-      <div id="leftPanel">
+  	<div id="container" class="fit-width flex-horizontal">
+      <div id="leftPanel" class="flex-vertical flex-equal-justified">
         <div>
-          <input class="inputWithIcon" value="{{attribute.name::input}}">
-            <iron-icon class="inputWithIconIcon" icon="icons:create"></iron-icon>
-          </input>
+					  <paper-input value="{{attribute.name}}" on-change="_checkValueValidity" noLabelFloat></paper-input>
         </div>
         <div>
           <select id="datatypeSelect" value="{{attribute.datatype::change}}">
@@ -98,6 +100,9 @@
         </div>
 		  </div>
   	</div>
+		<!-- Notify toast -->
+	  <paper-toast class="fit-bottom" id="__notify_toast__" style="background-color:rgba(0,0,0,0.37)" duration=0> </paper-toast>
+
 
 	</template>
 
@@ -171,6 +176,10 @@
       }
 
 	  },
+
+		behaviors: [
+			NotifyToastBehavior
+		],
 
 	  listeners: {
 
@@ -247,6 +256,23 @@
         this.$.rightPanel.style.backgroundColor = "#ef5e4a";
 				this._enabledMessage = "disabled";
       }
+		},
+
+		_checkValueValidity: function(evt){
+			var value = evt.target.value;
+			var elem = evt.target;
+			var forbidenChars = [' ', '\\', '#'];
+			var invalid = false;
+			for (var i = 0; i < forbidenChars.length; i++) {
+				if (value.indexOf(forbidenChars[i]) !== -1){
+					invalid = true;
+					this.notifyToast('The values must not contain a space ( ), an anti-slash(\\) or a hash (#).',{
+						type:'Error',
+						timeout:-1
+					});
+				}
+			}
+			elem.set('invalid', invalid);
 		}
 
 	});

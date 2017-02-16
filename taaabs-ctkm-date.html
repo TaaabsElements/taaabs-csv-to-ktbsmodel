@@ -1,206 +1,155 @@
-<link rel="import" href="../taaabs-themes/taaabs-dark-theme.html">
+<link rel="import" href="../taaabs-themes/taaabs-theme.html">
+<link rel="import" href="../notify-toast-behavior/notify-toast-behavior.html">
+<link rel="import" href="../app-localize-behavior/app-localize-behavior.html">
+<link rel="import" href="../paper-dropdown-menu/paper-dropdown-menu.html">
 <dom-module id="taaabs-ctkm-date">
   <template>
-    <style include="taaabs-dark-theme"></style>
+    <style include="taaabs-theme"></style>
     <style>
       :host{
         width: 100%;
       }
       :host .editIcons{
         float:right;
-        cursor: pointer;
       }
       :host #container{
         margin: 0 auto;
         max-width: 1000px;
       }
 
-      /*/////////*/
-      /* TIMEDIV */
-      /*/////////*/
-
-      :host #timeDiv{
-        opacity: 0;
-        pointer-events: none;
-
-        -webkit-transition: opacity 0.25s ease-in-out;
-        -moz-transition: opacity 0.25s ease-in-out;
-        -o-transition: opacity 0.25s ease-in-out;
-        -ms-transition: opacity 0.25s ease-in-out;
-      }
-
-      :host .tableRow{
-        display: table;
-        table-layout: fixed;
-        width: 100%;
-        padding: 1em 0 1em 0;
-      }
-
-      :host .tableCell{
-        display: table-cell;
-        width: 50%;
-      }
-
-      :host #bPreview, #ePreview{
+      :host #b-preview, #ePreview{
         display: block;
-        max-height: 6em;
-        height: 6em;
-        overflow-y: scroll;
+        max-height: 120px;
+        height: 120px;
+        overflow-y: auto;
         line-height: 1.5em;
-      }
-
-      :host #bCustomFormatDiv, #eCustomFormatDiv{
-        -webkit-transition: opacity 0.25s ease-in-out;
-        -moz-transition: opacity 0.25s ease-in-out;
-        -o-transition: opacity 0.25s ease-in-out;
-        -ms-transition: opacity 0.25s ease-in-out;
-      }
-
-      :host #endTimeDivs{
-        pointer-events: none;
-        opacity: 0.37;
-
-        -webkit-transition: opacity 0.25s ease-in-out;
-        -moz-transition: opacity 0.25s ease-in-out;
-        -o-transition: opacity 0.25s ease-in-out;
-        -ms-transition: opacity 0.25s ease-in-out;
       }
 
     </style>
 
     <div id="container" style="">
-      <iron-icon icon="icons:check" class="editIcons fgGreen fgGreenH" on-click="_submit"></iron-icon>
-      <h4> Définition de la mesure de temporalité des traces : </h4>
+      <iron-icon icon="icons:forward" class="editIcons fgSuccess fgSuccessH hoverable clickable" on-click="_submit"></iron-icon>
+      <h4>[[localize('title')]]:</h4>
 
       <!-- ORDER/TIME RADIO BUTTONS -->
       <div style="padding:1em 0 1em 0;border-bottom:solid 1px grey;">
         <input type="radio" name="size" id="orderRadio" on-click="_useOrderClicked" checked></input>
-        <label for="orderRadio">Utiliser l'order d'apparition des obsels.</label><br/>
+        <label for="orderRadio">[[localize('order-radio')]]</label><br/>
         <input type="radio" name="size" id="timeRadio" on-click="_useTimeClicked" on-click="_useTimeClicked" ></input>
-        <label for="timeRadio">Utiliser une valeur présente dans les traces.</label>
+        <label for="timeRadio">[[localize('time-radio')]]</label>
       </div>
 
-      <div id="timeDiv" style="padding:1em 0 1em 0;border-bottom:solid 1px grey; margin: 0 auto; max-width: 1000px">
+      <div id="time-div" class="swag-scroll fade disable" style="padding:1em 0 1em 0;border-bottom:solid 1px grey; margin: 0 auto; max-width: 1000px; overflow-y: auto">
 
+        <p>[[localize('b-title')]]</p>
         <!-- BEGIN TIME DIV -->
-        <div class="tableRow">
-          <span class="tableCell">
-            Colonne de temps de début :
-          </span>
-          <div class="tableCell">
-            <select id="bColumnSelector" title="Colonne de dates" on-change="_bColumnSelectorChanged">
+        <div class="flex-horizontal">
+          <div style="width: 50%; padding: 10px;">
+            <paper-dropdown-menu class="fit-width" label="[[localize('b-column-selector')]]">
+              <paper-listbox id="b-column-selector" class="dropdown-content" on-iron-select="_bColumnSelectorChanged">
+              <paper-listbox>
+            </paper-dropdown-menu>
+            <div id="b-preview" class="swag-scroll"></div>
+          </div>
+          <div style="width: 50%; padding: 10px;">
+            <div class="flex-horizontal" style="padding-top:28px">
+              <div class="flexchild">
+                <paper-checkbox id="b-lucky-checkbox" class="fit-width" on-click="_onBeginLuckyClick" checked noink>[[localize('lucky-check')]]</paper-checkbox>
+              </div>
+              <div>
+                <iron-icon icon="icons:help-outline" on-click="_onHelpFeelingLuckyClick" class="fgLog fgLogH hoverable clickable" style="margin-left: 20px;"></iron-icon>
+              </div>
+            </div>
+            <div id="b-custom-format-div" class="fade">
+              <div>
+                <paper-input id="b-custom-format-input" class="fit-width" label="[[localize('b-custom-input')]]" value="{{beginFormat}}" disabled></paper-input>
+              </div>
+              <div>
+                <div class="flex-horizontal fit-width flex-equal-justified">
+                  <span style="font-weight: bold; color: #D91E18">[[localize('day')]]</span>
+                  <span style="font-weight: bold; color: #F89406">[[localize('hour')]]</span>
+                </div>
+                <div class="flex-horizontal fit-width flex-equal-justified">
+                  <span style="font-weight: bold; color: #446CB3">[[localize('month')]]</span>
+                  <span style="font-weight: bold; color: #19B5FE">[[localize('minutes')]]</span>
+                </div>
+                <div class="flex-horizontal fit-width flex-equal-justified">
+                  <span style="font-weight: bold; color: #26A65B">[[localize('year')]]</span>
+                  <span style="font-weight: bold; color: #9A12B3">[[localize('seconds')]]</span>
+                </div>
+                <div class="flex-horizontal fit-width flex-equal-justified">
+                  <span style="font-weight: bold; color: grey">[[localize('ignored')]]</span>
+                  <span style="font-weight: bold; color: #00B16A">[[localize('milliseconds')]]</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
 
-            </select>
-          </div>
-        </div>
-        <div class="tableRow">
-          <span class="tableCell">
-           Exemples provenant du fichier de trace:
-          </span>
-          <div class="tableCell">
-            <div id="bPreview"></div>
-          </div>
-        </div>
-        <div class="tableRow">
-          <span class="tableCell" style="width:10%">
-           Format:
-          </span>
-          <div class="tableCell" style="width:40%; padding-right: 1em">
-            <select id="bFormatSelector" title="format de date" on-change="_bFormatSelectorChanged">
-              <option selected value="custom">custom</option>
-              <option value="milliseconds">milliseconds</option>
-              <option value="standard">standard</option>
-            </select>
-          </div>
-          <div class="tableCell" style="width:45%">
-            <span id="bFormatSample">example: the 8-01, in 2016 at 8h30'.</span>
-          </div>
-          <div class="tableCell" style="width:5%">
-          </div>
-        </div>
-        <div class="tableRow" id="bCustomFormatDiv">
-          <span class="tableCell">
-           Format personnalisé:
-          </span>
-          <div class="tableCell">
-            <input class="inputWithIcon" value="{{beginFormat::input}}">
-              <iron-icon class="inputWithIconIcon fgDarkBlue" icon="icons:create"></iron-icon>
-            </input>
-          </div>
-        </div>
-        <div class="tableRow">
-          <h5>symboles</h5>
-          <span style="font-weight: bold; color: #D91E18"> 'D' : Jour </span> <span style="font-weight: bold; color: #F89406"> 'H' : Heures </span> <br/>
-          <span style="font-weight: bold; color: #446CB3"> 'M' : Mois </span> <span style="font-weight: bold; color: #19B5FE"> 'm' : Minutes </span> <br/>
-          <span style="font-weight: bold; color: #26A65B"> 'Y' : Année </span> <span style="font-weight: bold; color: #9A12B3"> 'S' : Secondes </span> <br/>
-          <span style="font-weight: bold; color: grey"> '.' : Ignorer </span> <span style="font-weight: bold; color: #00B16A"> 'm' : Millisecondes </span> <br/>
-        </div>
-        <div class="tableRow">
-          <div class="tableCell">
-            <input type="checkbox" id="useEndTime" on-click="_useEndTimeClicked" checked></input>
-            <label>Utiliser la même valeur pour les temps de début et de fin des obsels.</label>
-          </div>
+        <div class="padding: 10px">
+          <paper-checkbox id="use-end-time" on-click="_useEndTimeClicked" checked noink>[[localize('use-same-time')]]</paper-checkbox>
         </div>
 
         <!-- END TIME DIV -->
-        <div id="endTimeDivs">
-          <div class="tableRow">
-            <span class="tableCell">
-              Colonne de temps de début :
-            </span>
-            <div class="tableCell">
-              <select id="eColumnSelector" title="Colonne de dates" on-change="_eColumnSelectorChanged">
-
-              </select>
+        <div id="end-time-divs" class="fade disable">
+          <p>[[localize('e-title')]]</p>
+          <!-- BEGIN TIME DIV -->
+          <div class="flex-horizontal">
+            <div style="width: 50%; padding: 10px;">
+              <paper-dropdown-menu class="fit-width" label="[[localize('e-column-selector')]]">
+                <paper-listbox id="e-column-selector" class="dropdown-content" on-iron-select="_eColumnSelectorChanged">
+                <paper-listbox>
+              </paper-dropdown-menu>
+              <div id="e-preview" class="swag-scroll"></div>
             </div>
-          </div>
-          <div class="tableRow">
-            <span class="tableCell">
-             Exemples provenant du fichier de trace:
-            </span>
-            <div class="tableCell">
-              <div id="ePreview"></div>
-            </div>
-          </div>
-          <div class="tableRow">
-            <span class="tableCell" style="width:10%">
-             Format:
-            </span>
-            <div class="tableCell" style="width:40%; padding-right: 1em">
-              <select id="eFormatSelector" title="format de date" on-change="_eFormatSelectorChanged">
-                <option selected value="custom">custom</option>
-                <option value="milliseconds">milliseconds</option>
-                <option value="standard">standard</option>
-              </select>
-            </div>
-            <div class="tableCell" style="width:45%">
-              <span id="eFormatSample">example: the 8-01, in 2016 at 8h30'.</span>
-            </div>
-            <div class="tableCell" style="width:5%">
-              <iron-icon icon="icons:help-outline" title="symbols" class="fgDarkBlue fgDarkBlueH" style="float:right; cursor:pointer"></iron-icon>
-            </div>
-          </div>
-          <div class="tableRow" id="eCustomFormatDiv">
-            <span class="tableCell">
-             Format personnalisé:
-            </span>
-            <div class="tableCell">
-              <input class="inputWithIcon" value="{{endFormat::input}}">
-                <iron-icon class="inputWithIconIcon fgDarkBlue" icon="icons:create"></iron-icon>
-              </input>
+            <div style="width: 50%; padding: 10px;">
+              <div class="flex-horizontal" style="padding-top:28px">
+                <div class="flexchild">
+                  <paper-checkbox id="e-lucky-checkbox" class="fit-width" on-click="_onEndLuckyClick" checked noink>I'm feeling lucky</paper-checkbox>
+                </div>
+                <div>
+                  <iron-icon icon="icons:help-outline" on-click="_onHelpFeelingLuckyClick" class="fgLog fgLogH hoverable clickable" style="margin-left: 20px;"></iron-icon>
+                </div>
+              </div>
+              <div id="e-custom-format-div" class="fade">
+                <div>
+                  <paper-input id="e-custom-format-input" class="fit-width" label="[[localize('e-custom-input')]]" value="{{endFormat}}" disabled></paper-input>
+                </div>
+                <div>
+                  <div class="flex-horizontal fit-width flex-equal-justified">
+                    <span style="font-weight: bold; color: #D91E18">D: Jour</span>
+                    <span style="font-weight: bold; color: #F89406">H: Heures</span>
+                  </div>
+                  <div class="flex-horizontal fit-width flex-equal-justified">
+                    <span style="font-weight: bold; color: #446CB3">M: Mois</span>
+                    <span style="font-weight: bold; color: #19B5FE">m: Minutes</span>
+                  </div>
+                  <div class="flex-horizontal fit-width flex-equal-justified">
+                    <span style="font-weight: bold; color: #26A65B">Y: Année</span>
+                    <span style="font-weight: bold; color: #9A12B3">S: Secondes</span>
+                  </div>
+                  <div class="flex-horizontal fit-width flex-equal-justified">
+                    <span style="font-weight: bold; color: grey">.: Ignorer</span>
+                    <span style="font-weight: bold; color: #00B16A">s: Millisecondes</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
 
+    <!-- Notify toast -->
+    <paper-toast id="__notify_toast__" style="background-color:rgba(0,0,0,0.67)" duration=0> </paper-toast>
+
   </template>
   <script>
     /* global Polymer */
 
     /**
-    *
-    */
+     *
+     */
     Polymer({
       is: 'taaabs-ctkm-date',
 
@@ -283,143 +232,149 @@
           notify: true,
           value: '',
           observer: "_eCustomFormatChanged"
+        },
+
+        /**
+         * Localization.
+         * fr, en.
+         *
+         * @attribute language
+         * @type String
+         */
+        language: {
+          type: String,
+          notify: true,
         }
 
       },
 
-      ready: function() {
+      behaviors: [
+        Polymer.AppLocalizeBehavior,
+        NotifyToastBehavior
+      ],
+
+      ready: function() {},
+
+      attached: function(){
+        // Load i18n json.
+        this.loadResources(this.resolveUrl('./languages/locales_tcd.json'));
       },
 
-      initTime: function(){
-        if( this.csvSchema.time ){
+      /** ----------------------------------------------------------------------
+      // MARK: Functions: DOM events
+      **/
 
+      /**
+      * Either enable or disable the custom time input.
+      *
+      * @method _onBeginLuckyClick
+      */
+      _onBeginLuckyClick: function() {
+        if(this.$['b-lucky-checkbox'].checked){
+          this.set('beginFormat', 'lucky');
+          this.$['b-custom-format-div'].classList.add('fade');
+          this.$['b-custom-format-input'].disabled = true;
+        }
+        else{
+          this.$['b-custom-format-div'].classList.remove('fade');
+          this.$['b-custom-format-input'].disabled = false;
+        }
+      },
+
+      /**
+      * Display the lucky help toast.
+      *
+      * @method _onHelpFeelingLuckyClick
+      */
+      _onHelpFeelingLuckyClick: function() {
+        this.notifyToast(this.localize('lucky-help'), {
+          type:'Help',
+          timeout: -1
+        });
+      },
+
+
+      initTime: function() {
+        if (this.csvSchema.time) {
           this._getAllColumns();
-
-          if( this.csvSchema.time.beginColumn !== -1 ){
-
+          if (this.csvSchema.time.beginColumn !== -1) {
             this._initBeginColumn();
-
-            if( this.csvSchema.time.endColumn !== -1 ){
-
+            if (this.csvSchema.time.endColumn !== -1) {
               this._initEndColumn();
-
             }
           }
         }
       },
 
-      _initBeginColumn: function(){
+      _initBeginColumn: function() {
         this.set('columnForBegin', this.csvSchema.time.beginColumn);
-
-        this.$.bColumnSelector.options[0].selected = false;
-        this.$.bColumnSelector.options[this.columnForBegin].selected = true;
+        this.$['b-column-selector'].selected = this.columnForBegin;
         this._bColumnSelectorChanged();
-
         this.set('beginFormat', this.csvSchema.time.beginFormat);
-
-        this.$.timeDiv.style.opacity = 1;
-        this.$.timeDiv.style.pointerEvents = "auto";
-
+        this.$['time-div'].classList.remove('fade','disable');
         this.$.timeRadio.checked = true;
         this.$.orderRadio.checked = false;
-
-
       },
 
-      _initEndColumn: function(){
+      _initEndColumn: function() {
         this.set('columnForEnd', this.csvSchema.time.endColumn);
-
         this.$.eColumnSelector.options[0].selected = false;
         this.$.eColumnSelector.options[this.columnForEnd].selected = true;
         this._eColumnSelectorChanged();
-
         this.set('endFormat', this.csvSchema.time.endFormat);
-
         this.$.useEndTime.checked = false;
-
-
       },
 
-      _useOrderClicked: function(){
-        this.$.timeDiv.style.opacity = 0;
-        this.$.timeDiv.style.pointerEvents = "none";
-
+      _useOrderClicked: function() {
+        this.$['time-div'].classList.add('fade','disable');
         this.columnForBegin = -1;
         this.columnForEnd = -1;
         this.beginFormat = '';
         this.endFormat = '';
       },
 
-      _useTimeClicked: function(){
-        this.$.timeDiv.style.opacity = 1;
-        this.$.timeDiv.style.pointerEvents = "auto";
-
+      _useTimeClicked: function() {
+        this.$['time-div'].classList.remove('fade','disable');
         this._getAllColumns();
-
-        this.columnForBegin = parseInt( this.$.bColumnSelector.options[this.$.bColumnSelector.selectedIndex].value );
       },
 
-      _getAllColumns: function(){
-        this.$.bColumnSelector.innerHTML = "";
-        this.$.eColumnSelector.innerHTML = "";
+      _getAllColumns: function() {
+        this.$['b-column-selector'].innerHTML = "";
+        this.$['e-column-selector'].innerHTML = "";
         var columns = this.csvSchema.columns;
-        for(var i = 0 ; i < columns.length ; i++){
-          var opt = document.createElement('option');
+        for (var i = 0; i < columns.length; i++) {
+          var opt = document.createElement('paper-item');
           opt.value = i;
           opt.textContent = columns[i].name;
-          if(i===0)
-            opt.selected = true;
-          var eopt = opt.cloneNode();
+          var eopt = document.createElement('paper-item');
+          eopt.value = i;
           eopt.textContent = columns[i].name;
-          this.$.bColumnSelector.appendChild(opt);
-          this.$.eColumnSelector.appendChild(eopt);
+          this.$['b-column-selector'].appendChild(opt);
+          this.$['e-column-selector'].appendChild(eopt);
         }
         this._bColumnSelectorChanged();
       },
 
-      _bColumnSelectorChanged: function(){
+      _bColumnSelectorChanged: function() {
 
-        this.columnForBegin = parseInt( this.$.bColumnSelector.options[this.$.bColumnSelector.selectedIndex].value );
+        this.columnForBegin = this.$['b-column-selector'].selected;
         this.set('bSampleDates', []);
-
-        // Create a pointer to `this` for later.
-        var that = this;
-
-        // Create a callback object for the file reader.
-        var callback = {
-          onload: function(evt){
-
-            //parse the lines from the trace file and go to _updateSample
-            var worker = new Worker(that.resolveUrl('csvToArray.js'));
-            worker.addEventListener('message', function(e) {
-                var parsedSample = e.data;
-
-                that.$.bPreview.innerHTML = "";
-
-                for(var i = 1; i < parsedSample.length ; i++){
-                  var div = document.createElement('div');
-                  div.textContent = parsedSample[i][that.columnForBegin];
-                  that.$.bPreview.appendChild(div);
-                  that.push('bSampleDates', parsedSample[i][that.columnForBegin]);
-                }
-
-              }, false);
-            worker.postMessage({strData: evt.target.result, strDelimiter: that.csvSchema.separator});
-          },
-          onerror: function(evt){
-            console.log('error');
-            console.log(evt);
-          },
-          onprogress: function(evt){ }
-        }
-
-        //Get a few lines form the trace file.
-        that.fileReader.getSample(0, callback);
+        this.fileReader.getSampleCsv(0).then(function(data){
+          this.$['b-preview'].innerHTML = "";
+          for (var i = 1; i < data.length; i++) {
+            var div = document.createElement('div');
+            div.textContent = data[i][this.columnForBegin];
+            this.$['b-preview'].appendChild(div);
+            this.push('bSampleDates', data[i][this.columnForBegin]);
+          }
+        }.bind(this)).catch(function(err){
+          console.log(err);
+        });
       },
 
-      _eColumnSelectorChanged: function(){
+      _eColumnSelectorChanged: function() {
 
-        this.columnForEnd = parseInt( this.$.eColumnSelector.options[this.$.eColumnSelector.selectedIndex].value );
+        this.columnForEnd = parseInt(this.$.eColumnSelector.options[this.$.eColumnSelector.selectedIndex].value);
         this.set('eSampleDates', []);
 
         // Create a pointer to `this` for later.
@@ -427,51 +382,52 @@
 
         // Create a callback object for the file reader.
         var callback = {
-          onload: function(evt){
+          onload: function(evt) {
 
             //parse the lines from the trace file and go to _updateSample
             var worker = new Worker(that.resolveUrl('csvToArray.js'));
             worker.addEventListener('message', function(e) {
-                var parsedSample = e.data;
+              var parsedSample = e.data;
 
-                that.$.ePreview.innerHTML = "";
+              that.$.ePreview.innerHTML = "";
 
-                for(var i = 1; i < parsedSample.length ; i++){
-                  var div = document.createElement('div');
-                  div.textContent = parsedSample[i][that.columnForEnd];
-                  that.$.ePreview.appendChild(div);
-                  that.push('eSampleDates', parsedSample[i][that.columnForEnd]);
-                }
+              for (var i = 1; i < parsedSample.length; i++) {
+                var div = document.createElement('div');
+                div.textContent = parsedSample[i][that.columnForEnd];
+                that.$.ePreview.appendChild(div);
+                that.push('eSampleDates', parsedSample[i][that.columnForEnd]);
+              }
 
-              }, false);
-            worker.postMessage({strData: evt.target.result, strDelimiter: that.csvSchema.separator});
+            }, false);
+            worker.postMessage({
+              strData: evt.target.result,
+              strDelimiter: that.csvSchema.separator
+            });
           },
-          onerror: function(evt){
+          onerror: function(evt) {
             console.log('error');
             console.log(evt);
           },
-          onprogress: function(evt){ }
+          onprogress: function(evt) {}
         }
 
         //Get a few lines form the trace file.
         that.fileReader.getSample(0, callback);
       },
 
-      _bFormatSelectorChanged: function(){
+      _bFormatSelectorChanged: function() {
         var format = this.$.bFormatSelector.options[this.$.bFormatSelector.selectedIndex].value;
-        if(format === "custom"){
+        if (format === "custom") {
           this.$.bFormatSample.textContent = "example:  the 8-01, in 2016 at 8h30'.";
           this.$.bCustomFormatDiv.style.opacity = 1;
           this.$.bCustomFormatDiv.style.pointerEvents = "auto";
-        }
-        else if(format === "milliseconds"){
+        } else if (format === "milliseconds") {
           this.$.bFormatSample.textContent = "10 - 13 figures number.";
           this.$.bCustomFormatDiv.style.opacity = 0.37;
           this.$.bCustomFormatDiv.style.pointerEvents = "none";
 
           this.set('beginFormat', "milliseconds");
-        }
-        else if(format === "standard"){
+        } else if (format === "standard") {
           this.$.bFormatSample.textContent = "example: 1995-12-17T03:24:00";
           this.$.bCustomFormatDiv.style.opacity = 0.37;
           this.$.bCustomFormatDiv.style.pointerEvents = "none";
@@ -480,21 +436,19 @@
         }
       },
 
-      _eFormatSelectorChanged: function(){
+      _eFormatSelectorChanged: function() {
         var format = this.$.eFormatSelector.options[this.$.eFormatSelector.selectedIndex].value;
-        if(format === "custom"){
+        if (format === "custom") {
           this.$.eFormatSample.textContent = "example:  the 8-01, in 2016 at 8h30'.";
           this.$.eCustomFormatDiv.style.opacity = 1;
           this.$.eCustomFormatDiv.style.pointerEvents = "auto";
-        }
-        else if(format === "milliseconds"){
+        } else if (format === "milliseconds") {
           this.$.eFormatSample.textContent = "10 - 13 figures number.";
           this.$.eCustomFormatDiv.style.opacity = 0.37;
           this.$.eCustomFormatDiv.style.pointerEvents = "none";
 
           this.set('endFormat', "milliseconds");
-        }
-        else if(format === "standard"){
+        } else if (format === "standard") {
           this.$.eFormatSample.textContent = "example: 1995-12-17T03:24:00";
           this.$.eCustomFormatDiv.style.opacity = 0.37;
           this.$.eCustomFormatDiv.style.pointerEvents = "none";
@@ -503,45 +457,39 @@
         }
       },
 
-      _useEndTimeClicked: function(e){
-        if(e.target.checked){
-          this.$.endTimeDivs.style.opacity = 0.37;
-          this.$.endTimeDivs.style.pointerEvents = "none";
-        }
-        else{
-          this.$.endTimeDivs.style.opacity = 1;
-          this.$.endTimeDivs.style.pointerEvents = "auto";
-        }
+      _useEndTimeClicked: function(e) {
+        if (e.target.checked)
+          this.$['end-time-divs'].classList.add('fade','disable');
+        else
+          this.$['end-time-divs'].classList.remove('fade','disable');
       },
 
-
-
-      _bCustomFormatChanged: function(){
-        if( this.beginFormat !== '' ){
-          this.$.bPreview.innerHTML = "";
+      _bCustomFormatChanged: function() {
+        if (this.beginFormat !== '') {
+          this.$['b-preview'].innerHTML = "";
           var symbolsColor = {
-            'D' : '#D91E18',
-            'M' : '#446CB3',
-            'Y' : '#26A65B',
-            'H' : '#F89406',
-            'm' : '#19B5FE',
-            'S' : '#9A12B3',
-            's' : '#00B16A',
-            '.' : 'grey'
+            'D': '#D91E18',
+            'M': '#446CB3',
+            'Y': '#26A65B',
+            'H': '#F89406',
+            'm': '#19B5FE',
+            'S': '#9A12B3',
+            's': '#00B16A',
+            '.': 'grey'
           };
-          for(var i = 0 ; i < this.bSampleDates.length; i++){
+          for (var i = 0; i < this.bSampleDates.length; i++) {
 
             var match = this.bSampleDates[i].match(/\d+/g);
             var rest = this.bSampleDates[i].split(/\d+/);
 
             var div = document.createElement('div');
-            for(var j = 0; j < rest.length; j++){
+            for (var j = 0; j < rest.length; j++) {
               var spanRest = document.createElement('span');
               spanRest.textContent = rest[j];
-              if( j < match.length ){
+              if (j < match.length) {
                 var spanMatch = document.createElement('span');
                 spanMatch.textContent = match[j];
-                if( j < this.beginFormat.length){
+                if (j < this.beginFormat.length) {
                   spanMatch.style.color = symbolsColor[this.beginFormat[j]] || 'black';
                   spanMatch.style.fontWeight = 'bold';
                 }
@@ -549,37 +497,37 @@
               div.appendChild(spanRest);
               div.appendChild(spanMatch);
             }
-            this.$.bPreview.appendChild(div);
+            this.$['b-preview'].appendChild(div);
           }
         }
       },
 
-      _eCustomFormatChanged: function(){
-        if( this.endFormat !== '' ){
+      _eCustomFormatChanged: function() {
+        if (this.endFormat !== '') {
           this.$.ePreview.innerHTML = "";
           var symbolsColor = {
-            'D' : '#D91E18',
-            'M' : '#446CB3',
-            'Y' : '#26A65B',
-            'H' : '#F89406',
-            'm' : '#19B5FE',
-            'S' : '#9A12B3',
-            's' : '#00B16A',
-            '.' : 'grey'
+            'D': '#D91E18',
+            'M': '#446CB3',
+            'Y': '#26A65B',
+            'H': '#F89406',
+            'm': '#19B5FE',
+            'S': '#9A12B3',
+            's': '#00B16A',
+            '.': 'grey'
           };
-          for(var i = 0 ; i < this.eSampleDates.length; i++){
+          for (var i = 0; i < this.eSampleDates.length; i++) {
 
             var match = this.eSampleDates[i].match(/\d+/g);
             var rest = this.eSampleDates[i].split(/\d+/);
 
             var div = document.createElement('div');
-            for(var j = 0; j < rest.length; j++){
+            for (var j = 0; j < rest.length; j++) {
               var spanRest = document.createElement('span');
               spanRest.textContent = rest[j];
-              if( j < match.length ){
+              if (j < match.length) {
                 var spanMatch = document.createElement('span');
                 spanMatch.textContent = match[j];
-                if( j < this.endFormat.length){
+                if (j < this.endFormat.length) {
                   spanMatch.style.color = symbolsColor[this.endFormat[j]] || 'black';
                   spanMatch.style.fontWeight = 'bold';
                 }
@@ -592,26 +540,28 @@
         }
       },
 
-      _displayDateInfos: function(){
+      _displayDateInfos: function() {
         this.$.lightbackground.style.display = 'block';
         this.$.lightbox.style.display = 'block';
       },
 
-      _removeDateInfos: function(){
+      _removeDateInfos: function() {
         this.$.lightbackground.style.display = 'none';
         this.$.lightbox.style.display = 'none';
       },
 
-      _submit: function(){
+      _submit: function() {
         console.log(this.csvSchema);
-        this.fire('TIME_SET', {time: {
-          beginColumn: this.columnForBegin,
-          endColumn: this.columnForEnd,
-          beginFormat: this.beginFormat,
-          endFormat: this.endFormat
-        }});
+        this.fire('TIME_SET', {
+          time: {
+            beginColumn: this.columnForBegin,
+            endColumn: this.columnForEnd,
+            beginFormat: this.beginFormat,
+            endFormat: this.endFormat
+          }
+        });
       }
 
-});
-</script>
+    });
+  </script>
 </dom-module>

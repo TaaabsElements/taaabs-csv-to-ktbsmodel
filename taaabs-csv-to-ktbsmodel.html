@@ -1,58 +1,64 @@
 <link rel="import" href="taaabs-ctkm-model-edit.html">
 <link rel="import" href="taaabs-ctkm-date.html">
 <link rel="import" href="taaabs-ctkm-model-preview.html">
-<link rel="import" href="../taaabs-themes/taaabs-dark-theme.html">
+<link rel="import" href="../taaabs-csv-collector/taaabs-csv-collector-behavior.html">
+<link rel="import" href="../notify-toast-behavior/notify-toast-behavior.html">
+<link rel="import" href="../app-localize-behavior/app-localize-behavior.html">
+<link rel="import" href="../taaabs-themes/taaabs-theme.html">
 <dom-module id="taaabs-csv-to-ktbsmodel">
   <template>
-    <style include="taaabs-dark-theme"></style>
+    <style include="taaabs-theme"></style>
     <style>
       :host {
         width: 100%;
         display: block;
-        height: 100%;
-        @apply(--layout-vertical);
+        padding-left: 0px;
+        padding-right: 0px;
       }
     </style>
 
-    <div style="width: 1000px; margin: 0 auto;">
-      <taaabs-csv-collector-steps id="tccs" steps=[[_steps]]></taaabs-csv-collector-steps>
+    <div class="fit-width flex-horizontal flex-equal-around-justified">
+      <div style="width: 1000px">
+        <taaabs-csv-collector-steps id="tccs" steps=[[_steps]]></taaabs-csv-collector-steps>
+      </div>
     </div>
 
-    <div>
-      <iron-pages selected="{{_pageIndex}}" style="margin-top: 30px;">
+    <iron-pages class="fit-width" selected="{{_pageIndex}}">
 
-        <div style="max-width: 1000px; margin: 0 auto">
-          <taaabs-csv-collector-files id="tccf" files="{{files}}" file-reader={{_filereader}} language="{{language}}"></taaabs-csv-collector-files>
-        </div>
+      <div style="max-width: 1000px; margin: 0 auto">
+        <taaabs-csv-collector-files id="tccf" files="{{files}}" file-reader={{_filereader}} language="{{language}}"></taaabs-csv-collector-files>
+      </div>
 
-        <div style="max-width: 1000px; margin: 0 auto">
-          <taaabs-csv-collector-configs id="tccc" csv-schemas="[[csvSchemas]]">
-          </taaabs-csv-collector-configs>
-        </div>
-
-
-        <div style="width: 100vw; left:0; position: absolute; max-height: 100%;">
-          <taaabs-ctkm-model-edit id="tcme" csv-schema="{{csvSchema}}" file-reader="[[_filereader]]" language="{{language}}">
-          </taaabs-ctkm-model-edit>
-        </div>
-
-        <div>
-          <taaabs-ctkm-date id="tcd" csv-schema="[[csvSchema]]" file-reader="[[_filereader]]">
-          </taaabs-ctkm-date>
-        </div>
-
-        <div>
-          <taaabs-ctkm-model-preview id="tcmp" csv-schemas="[[csvSchemas]]" csv-schema="[[csvSchema]]" base="[[base]]" language="{{language}}">
-          </taaabs-ctkm-model-preview>
-        </div>
+      <div style="max-width: 1000px; margin: 0 auto">
+        <taaabs-csv-collector-configs id="tccc" csv-schemas="[[csvSchemas]]">
+        </taaabs-csv-collector-configs>
+      </div>
 
 
-        <div style="max-width: 1000px; margin: 0 auto">
-          <taaabs-csv-collector-finalize id="tccfi" csv-schema-id="[[csvSchema.id]]" language="{{language}}"></taaabs-csv-collector-finalize>
-        </div>
+      <div style="width: 100vw; left:0; position: absolute; max-height: 100%;">
+        <taaabs-ctkm-model-edit id="tcme" csv-schema="{{csvSchema}}" file-reader="[[_filereader]]" language="{{language}}">
+        </taaabs-ctkm-model-edit>
+      </div>
 
-      </iron-pages>
-    </div>
+      <div class="fit-width">
+        <taaabs-ctkm-date id="tcd" csv-schema="[[csvSchema]]" file-reader="[[_filereader]]" language="{{language}}">
+        </taaabs-ctkm-date>
+      </div>
+
+      <div>
+        <taaabs-ctkm-model-preview id="tcmp" base="[[base]]" language="{{language}}">
+        </taaabs-ctkm-model-preview>
+      </div>
+
+
+      <div style="max-width: 1000px; margin: 0 auto">
+        <taaabs-csv-collector-finalize id="tccfi" csv-schema-id="[[csvSchema.id]]" language="{{language}}"></taaabs-csv-collector-finalize>
+      </div>
+
+    </iron-pages>
+
+    <!-- Notify toast -->
+    <paper-toast id="__notify_toast__" style="background-color:rgba(0,0,0,0.67)" duration=0> </paper-toast>
   </template>
 
   <script>
@@ -204,6 +210,12 @@
 
       },
 
+      behaviors: [
+        Polymer.AppLocalizeBehavior,
+        NotifyToastBehavior,
+        TaaabsCSVCollectorBehavior
+      ],
+
       ready: function() {
 
         // Create a pointer to `this` for later.
@@ -232,7 +244,7 @@
         })
 
         // When the user finished a model edition.
-        this.$.tcme.addEventListener('MODEL_SET', function(e) {
+        this.$.tcme.addEventListener('model-set', function(e) {
           that._goToPage(3);
 
           console.log(that.csvSchema);
@@ -245,9 +257,14 @@
 
         // When the user finished the obsel temporality edition.
         this.$.tcd.addEventListener('TIME_SET', function(e) {
-          that.csvSchema.time = e.detail.time;
-          that._goToPage(4);
-        })
+          this.csvSchema.time = e.detail.time;
+          //TODO : faire plus propre ici
+          var schema = JSON.parse(JSON.stringify(this.csvSchema));
+          console.log(this.csvSchemas);
+          this.$.tcmp.set('csvSchemas', this.csvSchemas);
+          this.$.tcmp.refresh(schema);
+          this._goToPage(4);
+        }.bind(this))
 
         // When the trace model has been created.
         this.$.tcmp.addEventListener('MODEL_CREATED', function() {

@@ -1,0 +1,16 @@
+{
+    "en": {
+      "title": "Edit your ktbs trace model",
+      "obsel-type-column": "Obsel type column",
+      "otc-visibility": "Preview values",
+      "otc-help": "Each distinct value of the chosen column will determine an <a href=\"https://kernel-for-trace-based-systems.readthedocs.io/en/latest/concepts/obsel.html\" target=\"_blank\">obsel type</a>.<br/> Chosing the <b>generic-type</b> option will create a single type of obsel.",
+      "tmp":"tmp"
+    },
+    "fr": {
+      "title": "Éditez votre modèle de trace ktbs",
+      "obsel-type-column": "Colonne du type d'obsel",
+      "otc-visibility": "Afficher les valeurs",
+      "otc-help": "Chaque valeurs distinctes de la colonne choisie déterminera un <a href=\"https://kernel-for-trace-based-systems.readthedocs.io/en/latest/concepts/obsel.html\" target=\"_blank\">type d'obsel</a>.<br/> En choisissant l'option <b>generic-type</b>, vous créerez un seul type d'obsel pour la trace.",
+      "tmp":"tmp"
+    }
+}
