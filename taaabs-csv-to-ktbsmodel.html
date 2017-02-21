@@ -222,22 +222,22 @@
         var that = this;
 
         // When the user chooses a step.
-        this.$.tccs.addEventListener('STEP_CLICKED', function(e) {
+        this.$.tccs.addEventListener('step-clicked', function(e) {
           that._goToPage(e.detail.index);
         })
 
         // When the user chooses a file.
-        this.$.tccf.addEventListener('FILES_SELECTED', function() {
+        this.$.tccf.addEventListener('files-selected', function() {
           that._goToPage(1);
         });
 
         // When the user chooses to create a new schema.
-        this.$.tccc.addEventListener('CREATE_SCHEMA', function(e) {
+        this.$.tccc.addEventListener('create-schema', function(e) {
           alert('You cannot create at the point of the upload process. ');
         })
 
         // When the user chooses to edit an existing schema.
-        this.$.tccc.addEventListener('SELECT_SCHEMA', function(e) {
+        this.$.tccc.addEventListener('select-schema', function(e) {
           that.set('csvSchema', that.csvSchemas[e.detail.index]);
           that._goToPage(2);
           that.$.tcme._getSample();
