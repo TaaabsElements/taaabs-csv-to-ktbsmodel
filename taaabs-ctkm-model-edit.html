@@ -55,7 +55,7 @@
   <iron-collapse id="samplePane">
     <div class="swag-scroll" style="display:block;height:200px;width:100%;overflow-y:auto;padding:20px;">
       <table>
-        <template is="dom-repeat" items="{{selectedColumnSample}}">
+        <template is="dom-repeat" items="{{_selectedColumnSample}}">
                 <tr>
                   <td> <span>{{item}}</span> </td>
                 </tr>
@@ -104,10 +104,10 @@
                 <taaabs-ctkm-sticker language={{language}} attribute={{item}}></taaabs-ctkm-sticker>
               </div>
             </template>
-          </div>
-        </template>
       </div>
+      </template>
     </div>
+  </div>
   </div>
   <!-- Notify toast -->
   <paper-toast id="__notify_toast__" style="background-color:rgba(0,0,0,0.37)" duration=0> </paper-toast>
@@ -121,6 +121,18 @@
       is: 'taaabs-ctkm-model-edit',
 
       properties: {
+
+        /**
+         * List of the samples of the selected column.
+         *
+         * @attribute _selectedColumnSample
+         * @type Array
+         */
+        _selectedColumnSample: {
+          type: Array,
+          notify: true,
+          value: []
+        },
 
         /**
          * The list of types objects (obsel type + attributes).
@@ -230,15 +242,10 @@
         }.bind(this));
         this.$.attributesTitle.addEventListener('scroll', function(e) {
           var rows = Polymer.dom(this.root).querySelectorAll('.attributesRow');
-          for(var i = 0; i < rows.length; i++){
+          for (var i = 0; i < rows.length; i++) {
             rows[i].scrollLeft = this.$.attributesTitle.scrollLeft;
           }
         }.bind(this));
-      },
-
-      attached: function() {
-        // Load i18n json.
-        this.loadResources(this.resolveUrl('./locales.json'));
       },
 
       //////////////////////
@@ -255,7 +262,7 @@
         var index = this.$.typeSelect.selectedIndex;
         if (index !== -1) {
           this.selectedColumn4Type = this.csvSchema.columns[parseInt(this.$.typeSelect.options[index].value)];
-          this.columnForType = parseInt(this.$.typeSelect.options[index].value);
+          this.set('columnForType', parseInt(this.$.typeSelect.options[index].value));
           this._updateSample();
         }
       },
@@ -289,51 +296,13 @@
        */
       _submit: function() {
         this.fire('model-set', {
-         typesObjects: this._typesObjects,
-         typeColumn: this.columnForType
+          typesObjects: this._typesObjects,
+          typeColumn: this.columnForType
         });
       },
 
       _typeEnabledClicked: function(e) {
         e.model.item.enabled = e.target.checked;
-      },
-
-      ///////////////////////
-      // PARSING FUNCTIONS //
-      ///////////////////////
-
-      /**
-       * Get the selected column values from a few lines of the trace file.
-       *
-       * @method _getSample
-       */
-      _getSample: function() {
-
-        // Create a callback object for the file reader.
-        var callback = {
-          onload: function(evt) {
-
-            //parse the lines from the trace file and go to _updateSample
-            var worker = new Worker(this.resolveUrl('csvToArray.js'));
-            worker.addEventListener('message', function(e) {
-              var parsedSample = e.data;
-              this.parsedSample = parsedSample;
-              this._updateSample();
-            }.bind(this), false);
-            worker.postMessage({
-              strData: evt.target.result,
-              strDelimiter: this.csvSchema.separator
-            });
-          }.bind(this),
-          onerror: function(evt) {
-            console.log('error');
-            console.log(evt);
-          },
-          onprogress: function(evt) {}
-        }
-
-        //Get a few lines form the trace file.
-        this.fileReader.getSample(0, callback);
       },
 
       /**
@@ -345,31 +314,18 @@
 
         // if the parsedSample as correctly been set.
         if (this.parsedSample !== undefined) {
-
-          // Reset selectedColumnSample
-          this.set('selectedColumnSample', []);
-
-          if (this.csvSchema.typeColumn && this.csvSchema.typeColumn !== -1) {
-            this.set('columnForType', this.csvSchema.typeColumn);
-            if (this.csvSchema.typesObjects) {
-
-              this.$.typeSelect.options[0].selected = false;
-              this.$.typeSelect.options[this.csvSchema.typeColumn].selected = true;
-
-              this.set('_typesObjects', this.csvSchema.typesObjects);
-
-              this.$.typesEditorPane.style.opacity = 1;
-            }
-          }
-          // Set the index of the selected column as type.
-          else {
-            this.set('columnForType', parseInt(this.$.typeSelect.options[this.$.typeSelect.selectedIndex].value));
-          }
-
-          // Push the samples in selectedColumnSample.
+          this.set('_selectedColumnSample',  []);
+          // Push the samples in _selectedColumnSample.
           for (var i = 1; i < this.parsedSample.length - 1; i++) {
-            this.push('selectedColumnSample', this.parsedSample[i][this.columnForType]);
+            this.push('_selectedColumnSample', this.parsedSample[i][this.columnForType]);
           }
+        } else {
+          this.fileReader.getSampleCsv(0, this.csvSchema.separator).then(function(sample) {
+            this.set('parsedSample', sample);
+            this._updateSample();
+          }.bind(this)).catch(function(err) {
+            console.log(err);
+          })
         }
       },
 
@@ -529,25 +485,25 @@
         this.$.samplePane.toggle();
       },
 
-      _checkValueValidity: function(evt){
+      _checkValueValidity: function(evt) {
         var value = evt.target.value;
         var elem = evt.target;
         var forbidenChars = [' ', '\\', '#'];
         var invalid = false;
         for (var i = 0; i < forbidenChars.length; i++) {
-          if (value.indexOf(forbidenChars[i]) !== -1){
+          if (value.indexOf(forbidenChars[i]) !== -1) {
             invalid = true;
-            this.notifyToast('The values must not contain a space ( ), an anti-slash(\\) or a hash (#).',{
-              type:'Error',
-              timeout:-1
+            this.notifyToast('The values must not contain a space ( ), an anti-slash(\\) or a hash (#).', {
+              type: 'Error',
+              timeout: -1
             });
           }
         }
         elem.set('invalid', invalid);
       },
 
-      _onObselTypeColumnHelp: function(){
-        this.notifyToast( this.localize('otc-help'), {
+      _onObselTypeColumnHelp: function() {
+        this.notifyToast(this.localize('otc-help'), {
           type: 'Log',
           timeout: -1
         });

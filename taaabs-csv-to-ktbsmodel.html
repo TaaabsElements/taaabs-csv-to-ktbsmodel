@@ -26,7 +26,7 @@
     <iron-pages class="fit-width" selected="{{_pageIndex}}">
 
       <div style="max-width: 1000px; margin: 0 auto">
-        <taaabs-csv-collector-files id="tccf" files="{{files}}" file-reader={{_filereader}} language="{{language}}"></taaabs-csv-collector-files>
+        <taaabs-csv-collector-files id="tccf" files="{{files}}" file-reader="{{fileReader}}" language="{{language}}"></taaabs-csv-collector-files>
       </div>
 
       <div style="max-width: 1000px; margin: 0 auto">
@@ -36,12 +36,12 @@
 
 
       <div style="width: 100vw; left:0; position: absolute; max-height: 100%;">
-        <taaabs-ctkm-model-edit id="tcme" csv-schema="{{csvSchema}}" file-reader="[[_filereader]]" language="{{language}}">
+        <taaabs-ctkm-model-edit id="tcme" csv-schema="{{csvSchema}}" file-reader="[[fileReader]]" language="{{language}}">
         </taaabs-ctkm-model-edit>
       </div>
 
       <div class="fit-width">
-        <taaabs-ctkm-date id="tcd" csv-schema="[[csvSchema]]" file-reader="[[_filereader]]" language="{{language}}">
+        <taaabs-ctkm-date id="tcd" csv-schema="[[csvSchema]]" file-reader="[[fileReader]]" language="{{language}}">
         </taaabs-ctkm-date>
       </div>
 
@@ -206,6 +206,11 @@
         language: {
           type: String,
           notify: true,
+        },
+
+        fileReader: {
+          type: Object,
+          notify: true
         }
 
       },
@@ -240,7 +245,6 @@
         this.$.tccc.addEventListener('select-schema', function(e) {
           that.set('csvSchema', that.csvSchemas[e.detail.index]);
           that._goToPage(2);
-          that.$.tcme._getSample();
         })
 
         // When the user finished a model edition.
