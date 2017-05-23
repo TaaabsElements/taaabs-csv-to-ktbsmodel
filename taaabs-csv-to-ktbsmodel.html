@@ -250,10 +250,6 @@
         // When the user finished a model edition.
         this.$.tcme.addEventListener('model-set', function(e) {
           that._goToPage(3);
-
-          console.log(that.csvSchema);
-          console.log(e.detail);
-
           that.csvSchema.typesObjects = e.detail.typesObjects;
           that.csvSchema.typeColumn = e.detail.typeColumn;
           that.$.tcd.initTime();
@@ -264,7 +260,6 @@
           this.csvSchema.time = e.detail.time;
           //TODO : faire plus propre ici
           var schema = JSON.parse(JSON.stringify(this.csvSchema));
-          console.log(this.csvSchemas);
           this.$.tcmp.set('csvSchemas', this.csvSchemas);
           this.$.tcmp.refresh(schema);
           this._goToPage(4);
